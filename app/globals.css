@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Orion Gases — design tokens
+   Transcribed from "Toronto Gas Design System v1.0 · August 2026",
+   sections 01 Colour, 02 Type, 03 Space.
+
+   Two rules from the system that the tokens below encode structurally:
+     · Gold 400 marks hazard and nothing else — never a button, never a link.
+     · Gold 800 carries every interactive affordance.
+   The neutral ramp is cool-tinted and deliberately skips 500. Pure black
+   never appears; the darkest ink is n-950 #0a0c10.
+   ========================================================================== */
+
+@theme {
+  /* --- Gold: accent & hazard ------------------------------------------- */
+  --color-gold-100: #fff2cf;
+  --color-gold-200: #faecb3;
+  --color-gold-300: #fcd67b;
+  --color-gold-400: #f5c64d; /* hazard + accent only */
+  --color-gold-600: #deab38;
+  --color-gold-800: #816412; /* every interactive affordance */
+
+  /* --- Neutral ramp (cool-tinted, no 500) ------------------------------ */
+  --color-n-25: #fafbfd;
+  --color-n-100: #eaedf1;
+  --color-n-200: #d7dbe0;
+  --color-n-300: #bdc1c8;
+  --color-n-400: #8d939b;
+  --color-n-600: #5c626b;
+  --color-n-700: #434850;
+  --color-n-800: #2a2e34;
+  --color-n-900: #15191d;
+  --color-n-950: #0a0c10;
+
+  /* --- Status --------------------------------------------------------- */
+  --color-status-active: #1e7a4b;
+  --color-status-active-bg: #e4f1ea;
+
+  /* --- GHS pictogram border (regulated red) --------------------------- */
+  --color-ghs-red: #d02020;
+
+  /* --- Focus ring: signal orange, the one non-hazard use of orange ---- */
+  --color-signal-orange: #e2620d;
+
+  /* --- Type ----------------------------------------------------------- */
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* --- Space: four-point base ----------------------------------------- */
+  --spacing-section: 84px;
+  --spacing-gutter: 56px;
+
+  /* --- Radius: 3px controls, 4px containers --------------------------- */
+  --radius-control: 3px;
+  --radius-container: 4px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 130px; /* clears the sticky header + section nav */
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-n-25);
+    color: var(--color-n-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-gold-800);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-gold-600);
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-n-300);
+  }
+
+  /* Design system 05: "3px signal-orange outline at 2px offset on every
+     focusable element. This is the one non-hazard use of orange." */
+  :focus-visible {
+    outline: 3px solid var(--color-signal-orange);
+    outline-offset: 2px;
+  }
+
+  /* Chemical formulae render with real subscript elements. Keep them from
+     shifting the line box. */
+  sub {
+    font-size: 0.72em;
+    line-height: 0;
+    vertical-align: baseline;
+    bottom: -0.22em;
+    position: relative;
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/**
+ * The content column.
+ *
+ * Design system §03 Space: "Content column — 1280px max · 72px gutters · 12-col
+ * grid, 24px gap." The screen frames in the design document are 1440px wide with
+ * 56px gutters, which is the same column expressed at the frame width the
+ * designer worked in.
+ *
+ * Capping the column is what stops the layout from spreading to the edges of a
+ * wide display. Backgrounds stay full-bleed: this utility goes on an inner
+ * wrapper, never on the element carrying the background.
+ *
+ *   ≥1440px → 1440px outer, 72px gutters, 1296px of content
+ */
+@utility gutter {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: 18px;
+
+  @media (width >= 48rem) {
+    padding-inline: 56px;
+  }
+
+  @media (width >= 80rem) {
+    padding-inline: 72px;
+  }
+}
+
+@utility mono-label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-n-600);
+}
+
+/* Wide content scrolls inside its own container; the page body never scrolls
+   horizontally. */
+@utility scroll-x {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll-x::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+/* ==========================================================================
+   Motion
+   Design system: 150ms ease-out on background only. No transform, no bounce.
+   ========================================================================== */
+
+@keyframes og-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes og-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scaleY(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes og-rule {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes og-grid {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 72px 0, 0 72px;
+  }
+}
+
+.og-fade-up {
+  animation: og-fade-up 720ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.og-rise {
+  animation: og-rise 760ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.og-rule {
+  transform-origin: top;
+  animation: og-rule 900ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.og-grid {
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(245, 198, 77, 0.22) 0 1px,
+      transparent 1px 72px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(245, 198, 77, 0.22) 0 1px,
+      transparent 1px 72px
+    );
+  animation: og-grid 26s linear infinite;
+}
+
+.og-grid-static {
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(245, 198, 77, 0.22) 0 1px,
+      transparent 1px 72px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(245, 198, 77, 0.22) 0 1px,
+      transparent 1px 72px
+    );
+}
+
+/* Scroll reveal — progressively enhanced. Without JS, content is visible. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 620ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    transform 620ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+[data-reveal].og-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   Print — design system section 08
+   "Print / Save spec sheet emits sections 2, 3, 7, 8, 9 and 13 only.
+    Navigation, CTAs and related products are hidden; tables lose zebra fill
+    and gain 1px rules."
+   ========================================================================== */
+
+@media print {
+  .print\:hidden,
+  [data-print="hide"] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  [data-zebra] {
+    background: transparent !important;
+  }
+
+  table,
+  th,
+  td {
+    border: 1px solid var(--color-n-200) !important;
+  }
+
+  [data-print-section="omit"] {
+    display: none !important;
+  }
+}
