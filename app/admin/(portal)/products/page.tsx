@@ -243,83 +243,146 @@ export default async function AdminProductsPage({
       )}
 
       {rows.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[880px] text-[14.5px]">
-            <caption className="sr-only">Product catalogue</caption>
-            <thead>
-              <tr className="border-b border-line bg-surface text-left">
-                {["Product", "Category", "UN", "Sizes", "Grades", "Status", "Updated"].map((h) => (
-                  <th
-                    key={h}
-                    scope="col"
-                    className="whitespace-nowrap px-5 py-3 font-mono text-[10.5px] font-normal uppercase tracking-[0.14em] text-faint first:pl-5 md:first:pl-8"
+        <>
+          {/*
+            Two renderings of the same rows. The eight-column table is right on
+            a desktop and impossible on a phone — 880px of it — so below `md` the
+            same fields stack into one card per product. `cells` is built once so
+            a column cannot appear in one layout and not the other.
+          */}
+          {(() => {
+            const cells = (p: Product) => ({
+              name: (
+                <>
+                  <span className="block text-ink">
+                    {p.name}{" "}
+                    {p.formula && (
+                      <span className="font-mono text-[13px] text-faint">
+                        <Formula value={p.formula} />
+                      </span>
+                    )}
+                  </span>
+                  <span className="font-mono text-[11.5px] text-faint">/{p.slug}</span>
+                </>
+              ),
+              category: categoryBySlug(p.categorySlug)?.shortName ?? p.categorySlug,
+              un: p.unNumber,
+              sizes: p.packages.length,
+              grades: p.grades.length,
+              status: (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.12em] ${STATUS_TONE[p.status]}`}>
+                  {p.status.toLowerCase()}
+                </span>
+              ),
+              updated: (
+                <>
+                  {lastTouched(p, meta[p.slug])}
+                  {meta[p.slug]?.edited && (
+                    <span className="ml-2 text-gold-link" title="Edited in the portal">•</span>
+                  )}
+                </>
+              ),
+              action: showingRemoved ? (
+                <form action={restoreProductFormAction} className="inline">
+                  <input type="hidden" name="slug" value={p.slug} />
+                  <button
+                    type="submit"
+                    disabled={!store.writable}
+                    title={store.writable ? undefined : store.reason}
+                    className="inline-flex h-9 items-center rounded-full border border-line px-3.5 text-[13px] text-ink transition-colors duration-150 hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {h}
-                  </th>
-                ))}
-                <th scope="col" className="px-5 py-3 md:pr-8">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((p) => (
-                <tr key={p.slug} className="border-b border-line last:border-0 hover:bg-surface">
-                  <th scope="row" className="px-5 py-3.5 text-left font-normal md:pl-8">
-                    <span className="block text-ink">
-                      {p.name}{" "}
-                      {p.formula && (
-                        <span className="font-mono text-[13px] text-faint">
-                          <Formula value={p.formula} />
-                        </span>
-                      )}
-                    </span>
-                    <span className="font-mono text-[11.5px] text-faint">/{p.slug}</span>
-                  </th>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-muted">
-                    {categoryBySlug(p.categorySlug)?.shortName ?? p.categorySlug}
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3.5 font-mono text-muted">{p.unNumber}</td>
-                  <td className="px-5 py-3.5 font-mono text-muted">{p.packages.length}</td>
-                  <td className="px-5 py-3.5 font-mono text-muted">{p.grades.length}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.12em] ${STATUS_TONE[p.status]}`}>
-                      {p.status.toLowerCase()}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3.5 font-mono text-[13px] text-faint">
-                    {lastTouched(p, meta[p.slug])}
-                    {meta[p.slug]?.edited && (
-                      <span className="ml-2 text-gold-link" title="Edited in the portal">•</span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-right md:pr-8">
-                    {showingRemoved ? (
-                      <form action={restoreProductFormAction} className="inline">
-                        <input type="hidden" name="slug" value={p.slug} />
-                        <button
-                          type="submit"
-                          disabled={!store.writable}
-                          title={store.writable ? undefined : store.reason}
-                          className="inline-flex h-9 items-center rounded-full border border-line px-3.5 text-[13px] text-ink transition-colors duration-150 hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          Restore
-                        </button>
-                      </form>
-                    ) : (
-                      <Link
-                        href={`/admin/products/${p.slug}`}
-                        className="text-[13.5px] text-gold-link underline-offset-2 hover:underline"
-                      >
-                        Edit
-                      </Link>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    Restore
+                  </button>
+                </form>
+              ) : (
+                <Link
+                  href={`/admin/products/${p.slug}`}
+                  className="inline-flex h-9 items-center rounded-full border border-line px-3.5 text-[13px] text-ink transition-colors duration-150 hover:bg-surface md:h-auto md:border-0 md:px-0 md:text-[13.5px] md:text-gold-link md:underline-offset-2 md:hover:bg-transparent md:hover:underline"
+                >
+                  Edit
+                </Link>
+              ),
+            });
+
+            return (
+              <>
+                {/* ------------------------------------- md and above -- */}
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full text-[14.5px]">
+                    <caption className="sr-only">Product catalogue</caption>
+                    <thead>
+                      <tr className="border-b border-line bg-surface text-left">
+                        {["Product", "Category", "UN", "Sizes", "Grades", "Status", "Updated"].map((h) => (
+                          <th
+                            key={h}
+                            scope="col"
+                            className="whitespace-nowrap px-5 py-3 font-mono text-[10.5px] font-normal uppercase tracking-[0.14em] text-faint first:pl-5 md:first:pl-8"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                        <th scope="col" className="px-5 py-3 md:pr-8">
+                          <span className="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((p) => {
+                        const c = cells(p);
+                        return (
+                          <tr key={p.slug} className="border-b border-line last:border-0 hover:bg-surface">
+                            <th scope="row" className="px-5 py-3.5 text-left font-normal md:pl-8">{c.name}</th>
+                            <td className="whitespace-nowrap px-5 py-3.5 text-muted">{c.category}</td>
+                            <td className="whitespace-nowrap px-5 py-3.5 font-mono text-muted">{c.un}</td>
+                            <td className="px-5 py-3.5 font-mono text-muted">{c.sizes}</td>
+                            <td className="px-5 py-3.5 font-mono text-muted">{c.grades}</td>
+                            <td className="px-5 py-3.5">{c.status}</td>
+                            <td className="whitespace-nowrap px-5 py-3.5 font-mono text-[13px] text-faint">{c.updated}</td>
+                            <td className="whitespace-nowrap px-5 py-3.5 text-right md:pr-8">{c.action}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* ------------------------------------- below md ------ */}
+                <ul className="flex flex-col md:hidden">
+                  {rows.map((p) => {
+                    const c = cells(p);
+                    return (
+                      <li key={p.slug} className="border-b border-line px-5 py-4 last:border-0">
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <div className="min-w-0">{c.name}</div>
+                          {c.status}
+                        </div>
+                        <dl className="mb-3.5 grid grid-cols-2 gap-x-4 gap-y-2 text-[13.5px]">
+                          <div className="flex flex-col gap-0.5">
+                            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Category</dt>
+                            <dd className="text-muted">{c.category}</dd>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">UN</dt>
+                            <dd className="font-mono text-muted">{c.un || "—"}</dd>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Sizes / grades</dt>
+                            <dd className="font-mono text-muted">{c.sizes} / {c.grades}</dd>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Updated</dt>
+                            <dd className="font-mono text-faint">{c.updated}</dd>
+                          </div>
+                        </dl>
+                        {c.action}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            );
+          })()}
+        </>
       ) : (
         <div className="flex flex-col items-start gap-3 px-5 py-16 md:px-8">
           <p className="text-[17px]">

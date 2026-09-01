@@ -16,7 +16,8 @@ import { industriesIndex, site } from "@/lib/data/site";
 import { cgaOutlets } from "@/lib/data/reference";
 import { productImage } from "@/lib/data/images";
 import {
-  AddButton, AddTile, Area, Derived, EditorSection, Lbl, Pick, RowDelete, Text, ToggleChip,
+  AddButton, AddTile, Area, CardField, CardPair, Derived, EditorSection, Lbl, Pick,
+  RecordCard, RowDelete, Text, ToggleChip,
 } from "./fields";
 import {
   AVAILABILITY_OPTIONS, CONTAINER_OPTIONS, LANGUAGE_OPTIONS, PHASE_OPTIONS,
@@ -253,7 +254,13 @@ export function ProductEditor({
           </span>
         </div>
 
-        <div className="flex items-center gap-3.5">
+        {/*
+          Wraps rather than overflowing: five controls do not fit one phone row.
+          Save is omitted here below lg because the sticky bottom bar already
+          carries it — two Save buttons on one screen is a worse answer than a
+          narrower toolbar.
+        */}
+        <div className="flex flex-wrap items-center justify-end gap-x-3.5 gap-y-2">
           {/*
             Destructive, so it sits outside the toggle → Preview → Save rhythm
             and carries no fill of its own. Reachable, not inviting.
@@ -311,7 +318,7 @@ export function ProductEditor({
             onClick={save}
             disabled={!storeWritable || pending || !dirty}
             title={storeWritable ? undefined : storeReason}
-            className="inline-flex h-10 shrink-0 items-center rounded-full bg-gold px-5 text-[14px] text-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="hidden h-10 shrink-0 items-center rounded-full bg-gold px-5 text-[14px] text-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 lg:inline-flex"
           >
             {pending ? "Saving…" : "Save"}
           </button>
@@ -520,31 +527,31 @@ function IdentityBlock({
             ariaLabel="Category"
             options={categories.map((c) => ({ value: c.slug, label: c.shortName }))}
             onChange={(v) => set("categorySlug", v)}
-            className="!h-[34px] w-auto min-w-[190px]"
+            className="!h-[34px] w-full min-w-0 sm:w-auto sm:min-w-[190px]"
           />
           <Pick
             value={draft.tdgClass}
             ariaLabel="TDG class"
             options={TDG_OPTIONS}
             onChange={(v) => set("tdgClass", v)}
-            className="!h-[34px] w-auto min-w-[230px]"
+            className="!h-[34px] w-full min-w-0 sm:w-auto sm:min-w-[230px]"
           />
           <Text
             value={draft.badge}
             onChange={(v) => set("badge", v)}
             placeholder="Card badge"
-            className="!h-[34px] w-[150px]"
+            className="!h-[34px] w-full sm:w-[150px]"
           />
         </div>
 
-        <div className="mb-3 flex gap-3">
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row">
           <input
             type="text"
             value={draft.name}
             aria-label="Product name"
             placeholder="Product name"
             onChange={(e) => set("name", e.target.value)}
-            className="h-[68px] min-w-0 flex-1 rounded-inner border border-dashed border-line-2 bg-surface px-4 text-[40px] tracking-[-0.025em] text-ink outline-none placeholder:text-faint-2 focus:border-solid focus:border-gold focus:bg-paper md:text-[52px]"
+            className="h-[60px] min-w-0 flex-1 rounded-inner border border-dashed border-line-2 bg-surface px-4 text-[30px] tracking-[-0.025em] text-ink outline-none placeholder:text-faint-2 focus:border-solid focus:border-gold focus:bg-paper sm:h-[68px] sm:text-[40px] md:text-[52px]"
           />
           <input
             type="text"
@@ -552,7 +559,7 @@ function IdentityBlock({
             aria-label="Formula"
             placeholder="Formula"
             onChange={(e) => set("formula", e.target.value || null)}
-            className="h-[68px] w-[140px] shrink-0 rounded-inner border border-dashed border-line-2 bg-surface px-3.5 font-mono text-[22px] text-muted outline-none placeholder:text-faint-2 focus:border-solid focus:border-gold focus:bg-paper md:w-[160px] md:text-[26px]"
+            className="h-[52px] w-full shrink-0 rounded-inner border border-dashed border-line-2 bg-surface px-3.5 font-mono text-[20px] text-muted outline-none placeholder:text-faint-2 focus:border-solid focus:border-gold focus:bg-paper sm:h-[68px] sm:w-[140px] sm:text-[22px] md:w-[160px] md:text-[26px]"
           />
         </div>
 
@@ -746,6 +753,9 @@ function GradesSection({ draft, set }: SectionProps) {
   const { grades, impuritySpecies } = draft;
 
   const setGrade = (i: number, next: Grade) => set("grades", replaceAt(grades, i, next));
+  const removeGrade = (i: number) => set("grades", grades.filter((_, x) => x !== i));
+  const removeSpecies = (si: number) =>
+    set("impuritySpecies", impuritySpecies.filter((_, x) => x !== si));
 
   const addGrade = () =>
     set("grades", [
@@ -759,6 +769,56 @@ function GradesSection({ draft, set }: SectionProps) {
       { key: `sp${Date.now().toString(36)}`, label: "" },
     ]);
 
+  const gradeLabel = (g: Grade, i: number) => g.name || `Grade ${i + 1}`;
+
+  /* One builder per cell type, shared by the table and the stacked view. */
+  const nameField = (g: Grade, i: number) => (
+    <Text value={g.name} onChange={(v) => setGrade(i, { ...g, name: v })} placeholder="Grade name" align="right" ariaLabel={`Grade ${i + 1} name`} />
+  );
+  const purityField = (g: Grade, i: number) => (
+    <Text value={g.minPurity} onChange={(v) => setGrade(i, { ...g, minPurity: v })} placeholder="99.999" mono align="right" ariaLabel={`Minimum purity for ${gradeLabel(g, i)}`} />
+  );
+  const impurityField = (g: Grade, i: number, key: string, speciesLabel: string) => (
+    <Text
+      value={g.impurities[key] ?? ""}
+      onChange={(v) => {
+        const impurities = { ...g.impurities };
+        if (v.trim()) impurities[key] = v;
+        else delete impurities[key];
+        setGrade(i, { ...g, impurities });
+      }}
+      placeholder="—"
+      mono
+      align="right"
+      ariaLabel={`${speciesLabel || "Species"} limit for ${gradeLabel(g, i)}`}
+    />
+  );
+  const conformsField = (g: Grade, i: number) => (
+    <Text value={g.conformsTo ?? ""} onChange={(v) => setGrade(i, { ...g, conformsTo: v || null })} placeholder="ISO / CGA standard" align="right" ariaLabel={`Conforms to, ${gradeLabel(g, i)}`} />
+  );
+  const coaField = (g: Grade, i: number) => (
+    <Text value={g.certificateOfAnalysis ?? ""} onChange={(v) => setGrade(i, { ...g, certificateOfAnalysis: v || null })} placeholder="Per batch / on request" align="right" ariaLabel={`Certificate of analysis, ${gradeLabel(g, i)}`} />
+  );
+  const speciesField = (si: number, label: string) => (
+    <Text
+      value={label}
+      onChange={(v) => set("impuritySpecies", replaceAt(impuritySpecies, si, { ...impuritySpecies[si], label: v }))}
+      placeholder="Species"
+      ariaLabel={`Impurity species ${si + 1}`}
+    />
+  );
+
+  /** A row of the transposed view: one labelled input per grade. */
+  const PerGrade = ({ render }: { render: (g: Grade, i: number) => React.ReactNode }) => (
+    <div className="flex flex-col gap-3">
+      {grades.map((g, i) => (
+        <CardField key={i} label={gradeLabel(g, i)}>
+          {render(g, i)}
+        </CardField>
+      ))}
+    </div>
+  );
+
   return (
     <EditorSection
       id="grades"
@@ -770,170 +830,176 @@ function GradesSection({ draft, set }: SectionProps) {
       {grades.length === 0 ? (
         <EmptyNote>No grades yet. The grades table is hidden on the public page.</EmptyNote>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line">
-          <table className="w-full min-w-[640px] text-[14.5px]">
-            <thead>
-              <tr className="bg-surface">
-                <th scope="col" className="w-[220px] px-4 py-3 text-left">
-                  <Lbl>Grade</Lbl>
-                </th>
-                {grades.map((g, i) => (
-                  <th key={i} scope="col" className="px-3 py-2.5">
-                    <Text
-                      value={g.name}
-                      onChange={(v) => setGrade(i, { ...g, name: v })}
-                      placeholder="Grade name"
-                      align="right"
-                      ariaLabel={`Grade ${i + 1} name`}
-                    />
-                  </th>
-                ))}
-                <th scope="col" className="w-12 px-2 py-2.5">
-                  <span className="sr-only">Remove</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t border-line">
-                <th scope="row" className="px-4 py-2.5 text-left font-normal">
-                  Minimum purity
-                </th>
-                {grades.map((g, i) => (
-                  <td key={i} className="px-3 py-2.5">
-                    <Text
-                      value={g.minPurity}
-                      onChange={(v) => setGrade(i, { ...g, minPurity: v })}
-                      placeholder="99.999"
-                      mono
-                      align="right"
-                      ariaLabel={`Minimum purity for grade ${i + 1}`}
-                    />
-                  </td>
-                ))}
-                <td className="px-2" />
-              </tr>
-
-              <tr className="border-t border-line bg-surface">
-                <td colSpan={grades.length + 2} className="px-4 py-2">
-                  <Lbl>Impurity limits — maximum ppm</Lbl>
-                </td>
-              </tr>
-
-              {impuritySpecies.map((species, si) => (
-                <tr key={species.key} className="border-t border-line">
-                  <th scope="row" className="py-2.5 pl-8 pr-4 text-left font-normal">
-                    <Text
-                      value={species.label}
-                      onChange={(v) =>
-                        set(
-                          "impuritySpecies",
-                          replaceAt(impuritySpecies, si, { ...species, label: v }),
-                        )
-                      }
-                      placeholder="Species"
-                      ariaLabel={`Impurity species ${si + 1}`}
-                    />
+        <>
+          {/* ------------------------------------------- lg and above -- */}
+          <div className="hidden overflow-x-auto rounded-card border border-line lg:block">
+            <table className="w-full text-[14.5px]">
+              <thead>
+                <tr className="bg-surface">
+                  <th scope="col" className="w-[220px] px-4 py-3 text-left">
+                    <Lbl>Grade</Lbl>
                   </th>
                   {grades.map((g, i) => (
-                    <td key={i} className="px-3 py-2.5">
-                      <Text
-                        value={g.impurities[species.key] ?? ""}
-                        onChange={(v) => {
-                          const impurities = { ...g.impurities };
-                          if (v.trim()) impurities[species.key] = v;
-                          else delete impurities[species.key];
-                          setGrade(i, { ...g, impurities });
-                        }}
-                        placeholder="—"
-                        mono
-                        align="right"
-                        ariaLabel={`${species.label || "Species"} limit for grade ${i + 1}`}
-                      />
-                    </td>
+                    <th key={i} scope="col" className="px-3 py-2.5">{nameField(g, i)}</th>
                   ))}
-                  <td className="px-2 py-2.5 text-right">
-                    <RowDelete
-                      label={`Remove ${species.label || "species"}`}
-                      onClick={() =>
-                        set(
-                          "impuritySpecies",
-                          impuritySpecies.filter((_, x) => x !== si),
-                        )
-                      }
-                    />
+                  <th scope="col" className="w-12 px-2 py-2.5">
+                    <span className="sr-only">Remove</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t border-line">
+                  <th scope="row" className="px-4 py-2.5 text-left font-normal">Minimum purity</th>
+                  {grades.map((g, i) => (
+                    <td key={i} className="px-3 py-2.5">{purityField(g, i)}</td>
+                  ))}
+                  <td className="px-2" />
+                </tr>
+
+                <tr className="border-t border-line bg-surface">
+                  <td colSpan={grades.length + 2} className="px-4 py-2">
+                    <Lbl>Impurity limits — maximum ppm</Lbl>
                   </td>
                 </tr>
+
+                {impuritySpecies.map((species, si) => (
+                  <tr key={species.key} className="border-t border-line">
+                    <th scope="row" className="py-2.5 pl-8 pr-4 text-left font-normal">
+                      {speciesField(si, species.label)}
+                    </th>
+                    {grades.map((g, i) => (
+                      <td key={i} className="px-3 py-2.5">
+                        {impurityField(g, i, species.key, species.label)}
+                      </td>
+                    ))}
+                    <td className="px-2 py-2.5 text-right">
+                      <RowDelete label={`Remove ${species.label || "species"}`} onClick={() => removeSpecies(si)} />
+                    </td>
+                  </tr>
+                ))}
+
+                <tr className="border-t border-line">
+                  <td colSpan={grades.length + 2} className="px-4 py-2.5">
+                    <AddTile onClick={addSpecies} className="h-9 w-full">+ Add an impurity limit</AddTile>
+                  </td>
+                </tr>
+
+                <tr className="border-t border-line">
+                  <th scope="row" className="px-4 py-2.5 text-left font-normal">Conforms to</th>
+                  {grades.map((g, i) => (
+                    <td key={i} className="px-3 py-2.5">{conformsField(g, i)}</td>
+                  ))}
+                  <td className="px-2" />
+                </tr>
+
+                <tr className="border-t border-line">
+                  <th scope="row" className="px-4 py-2.5 text-left font-normal">Certificate of analysis</th>
+                  {grades.map((g, i) => (
+                    <td key={i} className="px-3 py-2.5">{coaField(g, i)}</td>
+                  ))}
+                  <td className="px-2" />
+                </tr>
+
+                <tr className="border-t border-line bg-surface">
+                  <td className="px-4 py-2"><Lbl>Remove a grade</Lbl></td>
+                  {grades.map((g, i) => (
+                    <td key={i} className="px-3 py-2 text-right">
+                      <RowDelete label={`Remove grade ${gradeLabel(g, i)}`} onClick={() => removeGrade(i)} />
+                    </td>
+                  ))}
+                  <td className="px-2" />
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* ------------------------------------------- below lg ------ */}
+          {/*
+            The matrix is transposed rather than scrolled. A grades table is as
+            wide as you have grades, so no amount of shrinking fits it on a
+            phone — but every cell it holds is reachable as "this attribute, for
+            each grade", which stacks. Renaming a grade, renaming a species,
+            adding and removing both, all stay available.
+          */}
+          <div className="flex flex-col gap-4 lg:hidden">
+            <RecordCard title="Grades">
+              {grades.map((g, i) => (
+                <div key={i} className="flex items-end gap-2">
+                  <div className="min-w-0 flex-1">
+                    <CardField label={`Grade ${i + 1}`}>{nameField(g, i)}</CardField>
+                  </div>
+                  <RowDelete label={`Remove grade ${gradeLabel(g, i)}`} onClick={() => removeGrade(i)} />
+                </div>
               ))}
+            </RecordCard>
 
-              <tr className="border-t border-line">
-                <td colSpan={grades.length + 2} className="px-4 py-2.5">
-                  <AddTile onClick={addSpecies} className="h-9 w-full">
-                    + Add an impurity limit
-                  </AddTile>
-                </td>
-              </tr>
+            <RecordCard title="Minimum purity">
+              <PerGrade render={purityField} />
+            </RecordCard>
 
-              <tr className="border-t border-line">
-                <th scope="row" className="px-4 py-2.5 text-left font-normal">
-                  Conforms to
-                </th>
-                {grades.map((g, i) => (
-                  <td key={i} className="px-3 py-2.5">
-                    <Text
-                      value={g.conformsTo ?? ""}
-                      onChange={(v) => setGrade(i, { ...g, conformsTo: v || null })}
-                      placeholder="ISO / CGA standard"
-                      align="right"
-                      ariaLabel={`Conforms to, grade ${i + 1}`}
-                    />
-                  </td>
-                ))}
-                <td className="px-2" />
-              </tr>
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <Lbl>Impurity limits — maximum ppm</Lbl>
+            </div>
 
-              <tr className="border-t border-line">
-                <th scope="row" className="px-4 py-2.5 text-left font-normal">
-                  Certificate of analysis
-                </th>
-                {grades.map((g, i) => (
-                  <td key={i} className="px-3 py-2.5">
-                    <Text
-                      value={g.certificateOfAnalysis ?? ""}
-                      onChange={(v) => setGrade(i, { ...g, certificateOfAnalysis: v || null })}
-                      placeholder="Per batch / on request"
-                      align="right"
-                      ariaLabel={`Certificate of analysis, grade ${i + 1}`}
-                    />
-                  </td>
-                ))}
-                <td className="px-2" />
-              </tr>
+            {impuritySpecies.map((species, si) => (
+              <RecordCard
+                key={species.key}
+                title={species.label || `Species ${si + 1}`}
+                onDelete={() => removeSpecies(si)}
+                deleteLabel={`Remove ${species.label || "species"}`}
+              >
+                <CardField label="Species">{speciesField(si, species.label)}</CardField>
+                <PerGrade render={(g, i) => impurityField(g, i, species.key, species.label)} />
+              </RecordCard>
+            ))}
 
-              <tr className="border-t border-line bg-surface">
-                <td className="px-4 py-2">
-                  <Lbl>Remove a grade</Lbl>
-                </td>
-                {grades.map((g, i) => (
-                  <td key={i} className="px-3 py-2 text-right">
-                    <RowDelete
-                      label={`Remove grade ${g.name || i + 1}`}
-                      onClick={() => set("grades", grades.filter((_, x) => x !== i))}
-                    />
-                  </td>
-                ))}
-                <td className="px-2" />
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <AddTile onClick={addSpecies} className="h-11 w-full">+ Add an impurity limit</AddTile>
+
+            <RecordCard title="Conforms to">
+              <PerGrade render={conformsField} />
+            </RecordCard>
+
+            <RecordCard title="Certificate of analysis">
+              <PerGrade render={coaField} />
+            </RecordCard>
+          </div>
+        </>
       )}
     </EditorSection>
+  );
+}
+
+/**
+ * Thread specification, looked up from the verified CGA reference and never
+ * typed. A mistyped thread is a connection that should not mate, so that value
+ * must have exactly one source. Its own component because both the table and
+ * the card show it.
+ */
+function ThreadNote({ cga }: { cga: string }) {
+  const thread = threadFor(cga);
+  return (
+    <span className="text-[11.5px] leading-[1.4] text-faint">
+      {thread.thread ? (
+        <>
+          Thread auto-fills
+          <br />
+          <span className="font-mono text-[11px] text-muted">{thread.thread}</span>
+        </>
+      ) : !cga ? (
+        "Thread auto-fills"
+      ) : thread.listed ? (
+        "No thread spec published — renders as a dash"
+      ) : (
+        <span className="text-danger">Not in the CGA reference — check the number</span>
+      )}
+    </span>
   );
 }
 
 function PackagesSection({ draft, set }: SectionProps) {
   const packages = draft.packages;
   const setPkg = (i: number, next: PackageConfig) => set("packages", replaceAt(packages, i, next));
+  const removePkg = (i: number) => set("packages", packages.filter((_, x) => x !== i));
 
   const addPackage = () =>
     set("packages", [
@@ -944,6 +1010,39 @@ function PackagesSection({ draft, set }: SectionProps) {
         tare: null, availability: "Stocked", shape: "cylinder-300",
       },
     ]);
+
+  /**
+   * Built once per row, rendered by both the table and the card. Keyed rather
+   * than positional so neither layout can quietly pick up the wrong field, and
+   * so adding one here forces you to place it in both.
+   */
+  const fieldsFor = (p: PackageConfig, i: number) => ({
+    size: <Text value={p.size} onChange={(v) => setPkg(i, { ...p, size: v })} placeholder="300 Large" ariaLabel="Size" />,
+    sku: <Text value={p.sku} onChange={(v) => setPkg(i, { ...p, sku: v })} placeholder="SKU" mono ariaLabel="SKU" />,
+    container: (
+      <Pick value={p.container} ariaLabel="Container type" options={CONTAINER_OPTIONS} onChange={(v) => setPkg(i, { ...p, container: v })} />
+    ),
+    spec: <Text value={p.spec} onChange={(v) => setPkg(i, { ...p, spec: v })} placeholder="TC/DOT spec" mono ariaLabel="TC/DOT specification" />,
+    shape: <Pick value={p.shape} ariaLabel="Illustration" options={SHAPE_OPTIONS} onChange={(v) => setPkg(i, { ...p, shape: v })} />,
+    contents: (
+      <DualEditor value={p.contents} onChange={(v) => setPkg(i, { ...p, contents: v })} metricPlaceholder="m³" imperialPlaceholder="ft³" />
+    ),
+    pressure: (
+      <DualEditor value={p.fillPressure} onChange={(v) => setPkg(i, { ...p, fillPressure: v })} metricPlaceholder="kPa" imperialPlaceholder="psig" />
+    ),
+    cga: <Text value={p.cga} onChange={(v) => setPkg(i, { ...p, cga: v })} placeholder="580" mono ariaLabel="CGA outlet" />,
+    tare: (
+      <DualEditor
+        value={p.tare ?? { ...EMPTY_DUAL }}
+        onChange={(v) => setPkg(i, { ...p, tare: v.metric || v.imperial ? v : null })}
+        metricPlaceholder="kg"
+        imperialPlaceholder="lb"
+      />
+    ),
+    availability: (
+      <Pick value={p.availability} ariaLabel="Availability" options={AVAILABILITY_OPTIONS} onChange={(v) => setPkg(i, { ...p, availability: v })} />
+    ),
+  });
 
   return (
     <EditorSection
@@ -956,123 +1055,82 @@ function PackagesSection({ draft, set }: SectionProps) {
       {packages.length === 0 ? (
         <EmptyNote>No package configurations yet.</EmptyNote>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line">
-          <table className="w-full min-w-[1100px] text-[14px]">
-            <thead>
-              <tr className="bg-surface text-left">
-                {["Size / SKU", "Container / spec", "Contents", "Fill pressure", "CGA", "Tare", "Availability"].map((h) => (
-                  <th key={h} scope="col" className="px-3 py-3 font-normal">
-                    <Lbl>{h}</Lbl>
+        <>
+          {/* ------------------------------------------- lg and above -- */}
+          <div className="hidden overflow-x-auto rounded-card border border-line lg:block">
+            <table className="w-full text-[14px]">
+              <thead>
+                <tr className="bg-surface text-left">
+                  {["Size / SKU", "Container / spec", "Contents", "Fill pressure", "CGA", "Tare", "Availability"].map((h) => (
+                    <th key={h} scope="col" className="px-3 py-3 font-normal">
+                      <Lbl>{h}</Lbl>
+                    </th>
+                  ))}
+                  <th scope="col" className="w-12 px-2 py-3">
+                    <span className="sr-only">Remove</span>
                   </th>
-                ))}
-                <th scope="col" className="w-12 px-2 py-3">
-                  <span className="sr-only">Remove</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {packages.map((p, i) => {
-                const thread = threadFor(p.cga);
-                return (
-                  <tr key={i} className="border-t border-line align-top">
-                    <td className="px-3 py-3">
-                      <div className="flex flex-col gap-1.5">
-                        <Text value={p.size} onChange={(v) => setPkg(i, { ...p, size: v })} placeholder="300 Large" ariaLabel="Size" />
-                        <Text value={p.sku} onChange={(v) => setPkg(i, { ...p, sku: v })} placeholder="SKU" mono ariaLabel="SKU" />
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="flex flex-col gap-1.5">
-                        <Pick
-                          value={p.container}
-                          ariaLabel="Container type"
-                          options={CONTAINER_OPTIONS}
-                          onChange={(v) => setPkg(i, { ...p, container: v })}
-                        />
-                        <Text value={p.spec} onChange={(v) => setPkg(i, { ...p, spec: v })} placeholder="TC/DOT spec" mono ariaLabel="TC/DOT specification" />
-                        <Pick
-                          value={p.shape}
-                          ariaLabel="Illustration"
-                          options={SHAPE_OPTIONS}
-                          onChange={(v) => setPkg(i, { ...p, shape: v })}
-                        />
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <DualEditor
-                        value={p.contents}
-                        onChange={(v) => setPkg(i, { ...p, contents: v })}
-                        metricPlaceholder="m³"
-                        imperialPlaceholder="ft³"
-                      />
-                    </td>
-                    <td className="px-3 py-3">
-                      <DualEditor
-                        value={p.fillPressure}
-                        onChange={(v) => setPkg(i, { ...p, fillPressure: v })}
-                        metricPlaceholder="kPa"
-                        imperialPlaceholder="psig"
-                      />
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="flex flex-col gap-1.5">
-                        <Text value={p.cga} onChange={(v) => setPkg(i, { ...p, cga: v })} placeholder="580" mono ariaLabel="CGA outlet" />
-                        {/*
-                          Thread specification is looked up from the verified CGA
-                          reference, never typed. A mistyped thread is a
-                          connection that should not mate — that value must have
-                          exactly one source.
-                        */}
-                        <span className="text-[11.5px] leading-[1.4] text-faint">
-                          {thread.thread ? (
-                            <>
-                              Thread auto-fills
-                              <br />
-                              <span className="font-mono text-[11px] text-muted">{thread.thread}</span>
-                            </>
-                          ) : !p.cga ? (
-                            "Thread auto-fills"
-                          ) : thread.listed ? (
-                            "No thread spec published — renders as a dash"
-                          ) : (
-                            <span className="text-danger">Not in the CGA reference — check the number</span>
-                          )}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <DualEditor
-                        value={p.tare ?? { ...EMPTY_DUAL }}
-                        onChange={(v) =>
-                          setPkg(i, {
-                            ...p,
-                            tare: v.metric || v.imperial ? v : null,
-                          })
-                        }
-                        metricPlaceholder="kg"
-                        imperialPlaceholder="lb"
-                      />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Pick
-                        value={p.availability}
-                        ariaLabel="Availability"
-                        options={AVAILABILITY_OPTIONS}
-                        onChange={(v) => setPkg(i, { ...p, availability: v })}
-                      />
-                    </td>
-                    <td className="px-2 py-3 text-right">
-                      <RowDelete
-                        label={`Remove ${p.size || `row ${i + 1}`}`}
-                        onClick={() => set("packages", packages.filter((_, x) => x !== i))}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </tr>
+              </thead>
+              <tbody>
+                {packages.map((p, i) => {
+                  const f = fieldsFor(p, i);
+                  return (
+                    <tr key={i} className="border-t border-line align-top">
+                      <td className="px-3 py-3">
+                        <div className="flex flex-col gap-1.5">{f.size}{f.sku}</div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-col gap-1.5">{f.container}{f.spec}{f.shape}</div>
+                      </td>
+                      <td className="px-3 py-3">{f.contents}</td>
+                      <td className="px-3 py-3">{f.pressure}</td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-col gap-1.5">
+                          {f.cga}
+                          <ThreadNote cga={p.cga} />
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">{f.tare}</td>
+                      <td className="px-3 py-3">{f.availability}</td>
+                      <td className="px-2 py-3 text-right">
+                        <RowDelete label={`Remove ${p.size || `row ${i + 1}`}`} onClick={() => removePkg(i)} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ------------------------------------------- below lg ------ */}
+          <div className="flex flex-col gap-4 lg:hidden">
+            {packages.map((p, i) => {
+              const f = fieldsFor(p, i);
+              return (
+                <RecordCard
+                  key={i}
+                  title={p.size || `Size ${i + 1}`}
+                  subtitle={p.sku || undefined}
+                  onDelete={() => removePkg(i)}
+                  deleteLabel={`Remove ${p.size || `row ${i + 1}`}`}
+                >
+                  <CardPair>
+                    <CardField label="Size">{f.size}</CardField>
+                    <CardField label="SKU">{f.sku}</CardField>
+                  </CardPair>
+                  <CardField label="Container type">{f.container}</CardField>
+                  <CardField label="TC/DOT spec">{f.spec}</CardField>
+                  <CardField label="Illustration">{f.shape}</CardField>
+                  <CardField label="Contents">{f.contents}</CardField>
+                  <CardField label="Fill pressure">{f.pressure}</CardField>
+                  <CardField label="CGA outlet" hint={<ThreadNote cga={p.cga} />}>{f.cga}</CardField>
+                  <CardField label="Tare">{f.tare}</CardField>
+                  <CardField label="Availability">{f.availability}</CardField>
+                </RecordCard>
+              );
+            })}
+          </div>
+        </>
       )}
     </EditorSection>
   );
@@ -1123,21 +1181,23 @@ function PropertiesSection({ draft, set }: SectionProps) {
     >
       <div className="grid gap-x-10 gap-y-3 lg:grid-cols-2">
         {rows.map((row, i) => (
-          <div key={i} className="flex items-start gap-3 border-b border-line pb-3">
+          <div key={i} className="flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-start sm:gap-3">
             <Text
               value={row.label}
               onChange={(v) => setRow(i, { ...row, label: v })}
               placeholder="Property"
-              className="!w-[46%]"
+              className="sm:!w-[46%]"
               ariaLabel={`Property ${i + 1} label`}
             />
-            <div className="min-w-0 flex-1">
-              <PropertyValueEditor value={row.value} onChange={(v) => setRow(i, { ...row, value: v })} />
+            <div className="flex min-w-0 flex-1 items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <PropertyValueEditor value={row.value} onChange={(v) => setRow(i, { ...row, value: v })} />
+              </div>
+              <RowDelete
+                label={`Remove ${row.label || `property ${i + 1}`}`}
+                onClick={() => set("properties", rows.filter((_, x) => x !== i))}
+              />
             </div>
-            <RowDelete
-              label={`Remove ${row.label || `property ${i + 1}`}`}
-              onClick={() => set("properties", rows.filter((_, x) => x !== i))}
-            />
           </div>
         ))}
       </div>
@@ -1423,92 +1483,120 @@ function SafetySection({ draft, set }: SectionProps) {
 function DocumentsSection({ draft, set }: SectionProps) {
   const docs = draft.documents;
   const setDoc = (i: number, next: DocumentRow) => set("documents", replaceAt(docs, i, next));
+  const removeDoc = (i: number) => set("documents", docs.filter((_, x) => x !== i));
+
+  const addDoc = () =>
+    set("documents", [
+      ...docs,
+      { title: "", phase: null, language: "EN", version: "", revised: "" },
+    ]);
+
+  /* No blob store is connected, so this cannot accept a file yet. */
+  const uploadButton = (
+    <button
+      type="button"
+      disabled
+      title="Uploading a PDF needs a connected file store."
+      className="inline-flex h-9 cursor-not-allowed items-center gap-2 rounded-full border border-dashed border-line-2 px-3 text-[13px] text-faint"
+    >
+      Upload PDF
+    </button>
+  );
+
+  const fieldsFor = (d: DocumentRow, i: number) => ({
+    title: <Text value={d.title} onChange={(v) => setDoc(i, { ...d, title: v })} placeholder="Safety Data Sheet" ariaLabel="Document title" />,
+    phase: (
+      <Pick
+        value={d.phase ?? ""}
+        ariaLabel="Phase"
+        options={PHASE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+        onChange={(v) => setDoc(i, { ...d, phase: v || null })}
+      />
+    ),
+    language: (
+      <Pick
+        value={d.language}
+        ariaLabel="Language"
+        options={LANGUAGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+        onChange={(v) => setDoc(i, { ...d, language: v })}
+      />
+    ),
+    version: <Text value={d.version} onChange={(v) => setDoc(i, { ...d, version: v })} placeholder="1.0" mono ariaLabel="Version" />,
+    revised: <Text value={d.revised} onChange={(v) => setDoc(i, { ...d, revised: v })} placeholder="YYYY-MM-DD" mono ariaLabel="Revised" />,
+  });
 
   return (
     <EditorSection
       id="documents"
       title="Documents & downloads"
-      action={
-        <AddButton
-          onClick={() =>
-            set("documents", [
-              ...docs,
-              { title: "", phase: null, language: "EN", version: "", revised: "" },
-            ])
-          }
-        >
-          Attach a document
-        </AddButton>
-      }
+      action={<AddButton onClick={addDoc}>Attach a document</AddButton>}
       empty={docs.length === 0}
     >
       {docs.length === 0 ? (
         <EmptyNote>No documents attached.</EmptyNote>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line">
-          <table className="w-full min-w-[820px] text-[14px]">
-            <thead>
-              <tr className="bg-surface text-left">
-                {["Document", "Phase", "Language", "Version", "Revised", "File"].map((h) => (
-                  <th key={h} scope="col" className="px-3 py-3 font-normal">
-                    <Lbl>{h}</Lbl>
+        <>
+          <div className="hidden overflow-x-auto rounded-card border border-line lg:block">
+            <table className="w-full text-[14px]">
+              <thead>
+                <tr className="bg-surface text-left">
+                  {["Document", "Phase", "Language", "Version", "Revised", "File"].map((h) => (
+                    <th key={h} scope="col" className="px-3 py-3 font-normal">
+                      <Lbl>{h}</Lbl>
+                    </th>
+                  ))}
+                  <th scope="col" className="w-12 px-2 py-3">
+                    <span className="sr-only">Remove</span>
                   </th>
-                ))}
-                <th scope="col" className="w-12 px-2 py-3">
-                  <span className="sr-only">Remove</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {docs.map((d, i) => (
-                <tr key={i} className="border-t border-line">
-                  <td className="px-3 py-2.5">
-                    <Text value={d.title} onChange={(v) => setDoc(i, { ...d, title: v })} placeholder="Safety Data Sheet" ariaLabel="Document title" />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Pick
-                      value={d.phase ?? ""}
-                      ariaLabel="Phase"
-                      options={PHASE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                      onChange={(v) => setDoc(i, { ...d, phase: v || null })}
-                    />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Pick
-                      value={d.language}
-                      ariaLabel="Language"
-                      options={LANGUAGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                      onChange={(v) => setDoc(i, { ...d, language: v })}
-                    />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Text value={d.version} onChange={(v) => setDoc(i, { ...d, version: v })} placeholder="1.0" mono ariaLabel="Version" />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Text value={d.revised} onChange={(v) => setDoc(i, { ...d, revised: v })} placeholder="YYYY-MM-DD" mono ariaLabel="Revised" />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    {/* No blob store is connected, so this cannot accept a file yet. */}
-                    <button
-                      type="button"
-                      disabled
-                      title="Uploading a PDF needs a connected file store."
-                      className="inline-flex h-9 cursor-not-allowed items-center gap-2 rounded-full border border-dashed border-line-2 px-3 text-[13px] text-faint"
-                    >
-                      Upload PDF
-                    </button>
-                  </td>
-                  <td className="px-2 py-2.5 text-right">
-                    <RowDelete
-                      label={`Remove ${d.title || `document ${i + 1}`}`}
-                      onClick={() => set("documents", docs.filter((_, x) => x !== i))}
-                    />
-                  </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {docs.map((d, i) => {
+                  const f = fieldsFor(d, i);
+                  return (
+                    <tr key={i} className="border-t border-line">
+                      <td className="px-3 py-2.5">{f.title}</td>
+                      <td className="px-3 py-2.5">{f.phase}</td>
+                      <td className="px-3 py-2.5">{f.language}</td>
+                      <td className="px-3 py-2.5">{f.version}</td>
+                      <td className="px-3 py-2.5">{f.revised}</td>
+                      <td className="px-3 py-2.5">{uploadButton}</td>
+                      <td className="px-2 py-2.5 text-right">
+                        <RowDelete label={`Remove ${d.title || `document ${i + 1}`}`} onClick={() => removeDoc(i)} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex flex-col gap-4 lg:hidden">
+            {docs.map((d, i) => {
+              const f = fieldsFor(d, i);
+              return (
+                <RecordCard
+                  key={i}
+                  title={d.title || `Document ${i + 1}`}
+                  subtitle={[d.language, d.version && `v${d.version}`].filter(Boolean).join(" · ") || undefined}
+                  onDelete={() => removeDoc(i)}
+                  deleteLabel={`Remove ${d.title || `document ${i + 1}`}`}
+                >
+                  <CardField label="Document">{f.title}</CardField>
+                  <CardPair>
+                    <CardField label="Phase">{f.phase}</CardField>
+                    <CardField label="Language">{f.language}</CardField>
+                  </CardPair>
+                  <CardPair>
+                    <CardField label="Version">{f.version}</CardField>
+                    <CardField label="Revised">{f.revised}</CardField>
+                  </CardPair>
+                  <CardField label="File">{uploadButton}</CardField>
+                </RecordCard>
+              );
+            })}
+          </div>
+        </>
       )}
     </EditorSection>
   );

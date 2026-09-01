@@ -262,3 +262,67 @@ export function EditorSection({
     </section>
   );
 }
+
+/**
+ * Below `lg` the editor's tables become stacked cards.
+ *
+ * A package row is ten fields wide; a grades matrix is as wide as you have
+ * grades. Neither fits a phone, and the honest options are horizontal scrolling
+ * — which hides half the record and makes editing a hunt — or one record per
+ * card with its labels shown. This is the card.
+ *
+ * The rule that keeps the two layouts honest: each section builds its fields
+ * **once**, as a keyed object, and both the table and the card render the same
+ * nodes. A field cannot exist in one and not the other, and an edit made on a
+ * phone runs the identical state update it would on a desktop.
+ */
+export function RecordCard({
+  title,
+  subtitle,
+  onDelete,
+  deleteLabel,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  onDelete?: () => void;
+  deleteLabel?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-card border border-line p-4">
+      <div className="mb-3 flex items-start justify-between gap-3 border-b border-line pb-2.5">
+        <div className="min-w-0">
+          <p className="truncate text-[15px] text-ink">{title}</p>
+          {subtitle && <p className="truncate font-mono text-[11.5px] text-faint">{subtitle}</p>}
+        </div>
+        {onDelete && <RowDelete onClick={onDelete} label={deleteLabel ?? `Remove ${title}`} />}
+      </div>
+      <div className="flex flex-col gap-3">{children}</div>
+    </div>
+  );
+}
+
+/** One labelled field inside a RecordCard. */
+export function CardField({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Lbl>{label}</Lbl>
+      {children}
+      {hint && <span className="text-[11.5px] leading-[1.4] text-faint">{hint}</span>}
+    </div>
+  );
+}
+
+/** Two fields side by side inside a card, for values that belong together. */
+export function CardPair({ children }: { children: ReactNode }) {
+  return <div className="grid grid-cols-2 gap-3">{children}</div>;
+}

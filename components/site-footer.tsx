@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { site, footerColumns } from "@/lib/data/site";
 
@@ -19,11 +18,13 @@ export function SiteFooter() {
       <div className="gutter pb-10 pt-16 md:pt-[72px]">
         <div className="grid gap-12 border-b border-white/12 pb-14 md:grid-cols-2 lg:grid-cols-[320px_1fr_1fr_1fr] lg:gap-16">
           <div className="flex flex-col gap-5">
-            <Image
-              src="/assets/orion-logo-reversed.png"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/orion-logo-reversed.svg"
               alt="Orion Gases"
               width={96}
               height={43}
+              loading="lazy"
               className="block h-[43px] w-auto self-start"
             />
             <p className="text-[14.5px] leading-[1.6] text-white/62" style={{ textWrap: "pretty" }}>

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -38,12 +37,13 @@ export default async function AdminLoginPage({
     <main className="flex min-h-screen flex-col items-center justify-center bg-canvas px-5 py-16">
       <div className="w-full max-w-[400px]">
         <Link href="/" className="mb-9 inline-block" title="Back to the public site">
-          <Image
-            src="/assets/orion-logo.png"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/assets/orion-logo.svg"
             alt="Orion Gases"
             width={96}
             height={43}
-            priority
+            fetchPriority="high"
             className="block h-[38px] w-auto"
           />
         </Link>

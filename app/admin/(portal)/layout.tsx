@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { authState, getAdminSession } from "@/lib/auth/server";
@@ -39,12 +38,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <header className="flex h-[60px] shrink-0 items-center justify-between border-b border-line px-5 md:px-8">
         <div className="flex items-center gap-3.5">
           <Link href="/" className="shrink-0" title="Back to the public site">
-            <Image
-              src="/assets/orion-logo.png"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/orion-logo.svg"
               alt="Orion Gases"
-              width={75}
+              width={76}
               height={34}
-              priority
+              fetchPriority="high"
               className="block h-[30px] w-auto self-start md:h-[34px]"
             />
           </Link>

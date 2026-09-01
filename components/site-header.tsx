@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { site, nav } from "@/lib/data/site";
@@ -53,12 +52,13 @@ export function SiteHeader({ showUtility = true }: { showUtility?: boolean }) {
       >
         <div className="gutter flex h-[68px] items-center justify-between md:h-[84px]">
           <Link href="/" className="shrink-0">
-            <Image
-              src="/assets/orion-logo.png"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/orion-logo.svg"
               alt="Orion Gases"
               width={96}
               height={43}
-              priority
+              fetchPriority="high"
               className="block h-[38px] w-auto md:h-[43px]"
             />
           </Link>
