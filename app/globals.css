@@ -1,59 +1,69 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Orion Gases — design tokens
-   Transcribed from "Toronto Gas Design System v1.0 · August 2026",
-   sections 01 Colour, 02 Type, 03 Space.
+   Orion Gases — PREMIUM design tokens
+   Transcribed from "Orion Gases Website Premium.dc.html", plus the standalone
+   "Orion Nav" and "Orion Footer" artboards.
 
-   Two rules from the system that the tokens below encode structurally:
-     · Gold 400 marks hazard and nothing else — never a button, never a link.
-     · Gold 800 carries every interactive affordance.
-   The neutral ramp is cool-tinted and deliberately skips 500. Pure black
-   never appears; the darkest ink is n-950 #0a0c10.
+   The premium reformat's own summary of itself:
+     "One grotesk at a single weight, a warm achromatic canvas, hairline
+      structure and 20px cards. The yellow stays — but it works as a ribbon,
+      a rule and a chip rather than a gradient on every button."
+
+   Three rules that the tokens below encode structurally:
+     · ONE WEIGHT. font-weight:400 is the only weight in the entire premium
+       document (34/34 occurrences). Headings are large, not bold.
+     · STRUCTURE IS HAIRLINES. #E4E1DA appears 188× — more than any other
+       value. Dividers and 1px borders carry the layout, not fills or shadows.
+     · YELLOW IS A RIBBON, NOT A BUTTON. Primary actions are ink-black pills.
+       Gold survives as the utility ribbon, the active nav underline and chips.
    ========================================================================== */
 
 @theme {
-  /* --- Gold: accent & hazard ------------------------------------------- */
-  --color-gold-100: #fff2cf;
-  --color-gold-200: #faecb3;
-  --color-gold-300: #fcd67b;
-  --color-gold-400: #f5c64d; /* hazard + accent only */
-  --color-gold-600: #deab38;
-  --color-gold-800: #816412; /* every interactive affordance */
+  /* --- Warm achromatic ramp ------------------------------------------- */
+  --color-canvas: #edebe6;   /* design-canvas backdrop                     */
+  --color-paper: #ffffff;    /* page + card surface                        */
+  --color-surface: #f6f5f1;  /* tinted panels, cards, chips        (60×)   */
+  --color-surface-2: #f1efe9;/* card hover                          (7×)   */
+  --color-line: #e4e1da;     /* THE hairline                       (188×)  */
+  --color-line-2: #d8d4cb;   /* stronger rule, illustration bands   (5×)   */
 
-  /* --- Neutral ramp (cool-tinted, no 500) ------------------------------ */
-  --color-n-25: #fafbfd;
-  --color-n-100: #eaedf1;
-  --color-n-200: #d7dbe0;
-  --color-n-300: #bdc1c8;
-  --color-n-400: #8d939b;
-  --color-n-600: #5c626b;
-  --color-n-700: #434850;
-  --color-n-800: #2a2e34;
-  --color-n-900: #15191d;
-  --color-n-950: #0a0c10;
+  /* --- Ink ------------------------------------------------------------ */
+  --color-ink: #1a1a18;      /* headings, primary button fill      (70×)   */
+  --color-ink-2: #3b3a36;    /* nav, table values                  (39×)   */
+  --color-muted: #6e6b64;    /* body copy                         (125×)   */
+  --color-faint: #a29e96;    /* mono labels, meta                 (126×)   */
+  --color-faint-2: #c9c4b9;  /* link underlines                    (21×)   */
 
-  /* --- Status --------------------------------------------------------- */
+  /* --- Gold: ribbon, rule and chip. Never a button. ------------------- */
+  --color-gold: #f5c64d;     /* active underline, accent rule              */
+  --color-gold-ribbon: #fff3d6; /* utility bar, chips, emergency card      */
+  --color-gold-ink: #5a4a15; /* text on a gold ribbon                      */
+  --color-gold-link: #7e6413;/* links, meta emphasis                       */
+  --color-gold-wash: #fffdf6;/* highlighted table row                      */
+
+  /* --- Regulated / status --------------------------------------------- */
+  --color-danger: #c0392b;   /* GHS diamond border — regulated, not brand  */
   --color-status-active: #1e7a4b;
-  --color-status-active-bg: #e4f1ea;
-
-  /* --- GHS pictogram border (regulated red) --------------------------- */
-  --color-ghs-red: #d02020;
-
-  /* --- Focus ring: signal orange, the one non-hazard use of orange ---- */
-  --color-signal-orange: #e2620d;
 
   /* --- Type ----------------------------------------------------------- */
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  /* --- Space: four-point base ----------------------------------------- */
-  --spacing-section: 84px;
-  --spacing-gutter: 56px;
+  /* --- Radius --------------------------------------------------------- */
+  --radius-card: 20px;   /* 62× — the dominant card radius                 */
+  --radius-inner: 12px;  /* 18× — nested boxes, images inside cards        */
+  --radius-panel: 16px;  /*  8× — tables, callouts                         */
+  --radius-lg: 24px;     /*  8×                                            */
 
-  /* --- Radius: 3px controls, 4px containers --------------------------- */
-  --radius-control: 3px;
-  --radius-container: 4px;
+  /* --- Elevation ------------------------------------------------------ */
+  --shadow-card: 0 1px 2px rgba(26, 26, 24, 0.03),
+                 0 8px 18px rgba(26, 26, 24, 0.04),
+                 0 40px 40px rgba(26, 26, 24, 0.03);
+  --shadow-hero: 0 132px 53px rgba(140, 132, 112, 0.01),
+                 0 74px 44px rgba(140, 132, 112, 0.05),
+                 0 33px 33px rgba(140, 132, 112, 0.09),
+                 0 8px 18px rgba(140, 132, 112, 0.10);
 }
 
 /* ==========================================================================
@@ -61,56 +71,41 @@
    ========================================================================== */
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 130px; /* clears the sticky header + section nav */
+    scroll-padding-top: 120px;
   }
 
   body {
     margin: 0;
-    background: var(--color-n-25);
-    color: var(--color-n-900);
+    background: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
 
-  a {
-    color: var(--color-gold-800);
-    text-decoration: none;
-  }
+  /* Single weight. Headings scale by size and tracking, never by weight. */
+  h1, h2, h3, h4, h5, h6 { font-weight: 400; margin: 0; }
 
-  a:hover {
-    color: var(--color-gold-600);
-  }
+  a { color: var(--color-gold-link); text-decoration: none; }
+  a:hover { color: var(--color-ink); }
 
-  table {
-    border-collapse: collapse;
-  }
+  ::selection { background: var(--color-gold-ribbon); }
 
-  input,
-  textarea,
-  select {
-    font-family: inherit;
-  }
+  table { border-collapse: collapse; }
+  input, textarea, select { font-family: inherit; }
+  input::placeholder, textarea::placeholder { color: var(--color-faint); }
 
-  input::placeholder,
-  textarea::placeholder {
-    color: var(--color-n-300);
-  }
-
-  /* Design system 05: "3px signal-orange outline at 2px offset on every
-     focusable element. This is the one non-hazard use of orange." */
+  /* Focus ring in ink rather than signal-orange: the premium palette has no
+     orange, and an ink ring reads correctly on both paper and surface. */
   :focus-visible {
-    outline: 3px solid var(--color-signal-orange);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
 
-  /* Chemical formulae render with real subscript elements. Keep them from
-     shifting the line box. */
   sub {
     font-size: 0.72em;
     line-height: 0;
@@ -121,205 +116,142 @@
 }
 
 /* ==========================================================================
-   Utilities
+   Layout
+   Interior screens run 64px gutters inside the 1440 frame; the home page's
+   editorial sections pull in to 160px for a narrower measure.
    ========================================================================== */
 
-/**
- * The content column.
- *
- * Design system §03 Space: "Content column — 1280px max · 72px gutters · 12-col
- * grid, 24px gap." The screen frames in the design document are 1440px wide with
- * 56px gutters, which is the same column expressed at the frame width the
- * designer worked in.
- *
- * Capping the column is what stops the layout from spreading to the edges of a
- * wide display. Backgrounds stay full-bleed: this utility goes on an inner
- * wrapper, never on the element carrying the background.
- *
- *   ≥1440px → 1440px outer, 72px gutters, 1296px of content
- */
 @utility gutter {
   margin-inline: auto;
   width: 100%;
   max-width: 1440px;
-  padding-inline: 18px;
+  padding-inline: 20px;
+  @media (width >= 48rem) { padding-inline: 40px; }
+  @media (width >= 64rem) { padding-inline: 64px; }
+}
 
-  @media (width >= 48rem) {
-    padding-inline: 56px;
-  }
-
-  @media (width >= 80rem) {
-    padding-inline: 72px;
-  }
+@utility gutter-narrow {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: 20px;
+  @media (width >= 48rem) { padding-inline: 56px; }
+  @media (width >= 64rem) { padding-inline: 104px; }
+  @media (width >= 90rem) { padding-inline: 160px; }
 }
 
 @utility mono-label {
   font-family: var(--font-mono);
-  letter-spacing: 0.14em;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-n-600);
+  color: var(--color-faint);
 }
 
-/* Wide content scrolls inside its own container; the page body never scrolls
-   horizontally. */
 @utility scroll-x {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+.scroll-x::-webkit-scrollbar { height: 0; width: 0; }
 
-.scroll-x::-webkit-scrollbar {
-  height: 0;
-  width: 0;
+/* ==========================================================================
+   Hero choreography
+
+   Everything here is a MASK reveal, not a fade: type slides up from behind a
+   clipping edge, rules draw outward, table rows arrive in sequence. Masking is
+   what makes restrained motion feel expensive — the elements are never
+   semi-transparent, they are simply not there yet, then they are.
+
+   Easing is cubic-bezier(0.16, 1, 0.3, 1): a long decelerating tail with no
+   overshoot. The design guidance forbids bounce and elastic outright.
+   ========================================================================== */
+
+@keyframes og-line-rise {
+  from { transform: translateY(110%); }
+  to { transform: none; }
+}
+
+@keyframes og-rule-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes og-lift {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes og-row-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* A line of display type. The wrapper clips; the inner span travels. */
+.og-line-mask {
+  display: block;
+  overflow: hidden;
+  /* Descenders and negative tracking would otherwise be shaved by the clip. */
+  padding-bottom: 0.09em;
+  margin-bottom: -0.09em;
+}
+.og-line-mask > span {
+  display: block;
+  animation: og-line-rise 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.og-rule-x {
+  transform-origin: center;
+  animation: og-rule-x 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.og-lift { animation: og-lift 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.og-row-in { animation: og-row-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* The gold rule under the closing phrase draws left-to-right, last. */
+.og-underline {
+  transform-origin: left;
+  animation: og-rule-x 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ==========================================================================
-   Motion
-   Design system: 150ms ease-out on background only. No transform, no bounce.
+   Motion — 160-180ms ease-out, opacity and colour only. No transforms.
    ========================================================================== */
 
 @keyframes og-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
 }
 
-@keyframes og-rise {
-  from {
-    opacity: 0;
-    transform: translateY(26px) scaleY(0.94);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
+.og-fade-up { animation: og-fade-up 640ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 
-@keyframes og-rule {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes og-grid {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: 72px 0, 0 72px;
-  }
-}
-
-.og-fade-up {
-  animation: og-fade-up 720ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
-.og-rise {
-  animation: og-rise 760ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
-.og-rule {
-  transform-origin: top;
-  animation: og-rule 900ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
-.og-grid {
-  background-image:
-    repeating-linear-gradient(
-      to right,
-      rgba(245, 198, 77, 0.22) 0 1px,
-      transparent 1px 72px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(245, 198, 77, 0.22) 0 1px,
-      transparent 1px 72px
-    );
-  animation: og-grid 26s linear infinite;
-}
-
-.og-grid-static {
-  background-image:
-    repeating-linear-gradient(
-      to right,
-      rgba(245, 198, 77, 0.22) 0 1px,
-      transparent 1px 72px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(245, 198, 77, 0.22) 0 1px,
-      transparent 1px 72px
-    );
-}
-
-/* Scroll reveal — progressively enhanced. Without JS, content is visible. */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(16px);
   transition:
     opacity 620ms cubic-bezier(0.2, 0.7, 0.3, 1),
     transform 620ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-
-[data-reveal].og-in {
-  opacity: 1;
-  transform: none;
-}
+[data-reveal].og-in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-  }
+  html { scroll-behavior: auto; }
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .og-line-mask > span,
+  .og-rule-x,
+  .og-lift,
+  .og-row-in,
+  .og-underline { opacity: 1 !important; transform: none !important; }
+  *, *::before, *::after { animation: none !important; }
 }
 
 /* ==========================================================================
-   Print — design system section 08
-   "Print / Save spec sheet emits sections 2, 3, 7, 8, 9 and 13 only.
-    Navigation, CTAs and related products are hidden; tables lose zebra fill
-    and gain 1px rules."
+   Print — design system §08: sections 7, 8, 9 and 13 only.
    ========================================================================== */
 
 @media print {
-  .print\:hidden,
-  [data-print="hide"] {
-    display: none !important;
-  }
-
-  body {
-    background: #fff;
-  }
-
-  [data-zebra] {
-    background: transparent !important;
-  }
-
-  table,
-  th,
-  td {
-    border: 1px solid var(--color-n-200) !important;
-  }
-
-  [data-print-section="omit"] {
-    display: none !important;
-  }
+  .print\:hidden, [data-print="hide"] { display: none !important; }
+  body { background: #fff; }
+  [data-print-section="omit"] { display: none !important; }
+  table, th, td { border: 1px solid var(--color-line) !important; }
 }

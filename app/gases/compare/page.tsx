@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter, MobileTabBar } from "@/components/site-footer";
 import { Breadcrumb, PrimaryButton, TableFrame, Th } from "@/components/ui";
 import { Formula, PropertyValue } from "@/lib/format";
-import { products, productBySlug } from "@/lib/data/products";
+import { getProducts } from "@/lib/catalogue";
 import { maxPurity, cgaOutlets } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -31,10 +31,11 @@ export default async function ComparePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
+  const products = await getProducts();
   const raw = Array.isArray(sp.p) ? sp.p : sp.p ? sp.p.split(",") : [];
   const selected = raw
     .flatMap((s) => s.split(","))
-    .map((slug) => productBySlug(slug.trim()))
+    .map((slug) => products.find((p) => p.slug === slug.trim()))
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
     .slice(0, MAX);
 
@@ -59,28 +60,28 @@ export default async function ComparePage({
           />
 
           <div className="mb-8 mt-[18px] flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
-            <h1 className="text-[28px] font-semibold tracking-[-0.022em] md:text-[36px]">
+            <h1 className="text-[28px] tracking-[-0.022em] md:text-[44px] md:tracking-[-0.03em]">
               {selected.length > 0 ? `Comparing ${selected.length} product${selected.length === 1 ? "" : "s"}` : "Compare products"}
             </h1>
-            <p className="text-[14.5px] text-n-600">
+            <p className="text-[14.5px] text-muted">
               Maximum of {MAX}
               {selected.length > 0 && (
                 <>
                   {" · "}
-                  <Link href="/gases/compare" className="text-gold-800 underline">Clear</Link>
+                  <Link href="/gases/compare" className="text-gold-link underline">Clear</Link>
                 </>
               )}
             </p>
           </div>
 
           {selected.length === 0 ? (
-            <div className="flex flex-col items-start gap-4 rounded-[4px] border border-n-100 bg-n-25 px-8 py-12">
-              <p className="text-[17px] font-medium">Pick up to three products to compare.</p>
-              <p className="max-w-[52ch] text-[15px] leading-[1.65] text-n-600">
+            <div className="flex flex-col items-start gap-4 rounded-card border border-line bg-surface px-8 py-12">
+              <p className="text-[17px] ">Pick up to three products to compare.</p>
+              <p className="max-w-[52ch] text-[15px] leading-[1.65] text-muted">
                 Comparison lines up purity, CGA connection, physical properties and package
                 count so you can settle a specification without opening three tabs.
               </p>
-              <Link href="/gases" className="text-[15px] font-medium text-gold-800">
+              <Link href="/gases" className="text-[15px] text-gold-link">
                 Browse the catalogue →
               </Link>
             </div>
@@ -90,24 +91,24 @@ export default async function ComparePage({
                 <table className="w-full min-w-[720px] text-[14.5px]">
                   <caption className="sr-only">Product comparison</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th className="w-[220px]">Property</Th>
                       {selected.map((product) => (
                         <th key={product.slug} scope="col" className="px-5 py-4 text-right align-top">
-                          <span className="block text-[17px] font-semibold">
+                          <span className="block text-[17px] ">
                             {product.name}{" "}
                             {product.formula && (
-                              <span className="font-mono text-[13px] font-normal text-n-600">
+                              <span className="font-mono text-[13px] font-normal text-muted">
                                 <Formula value={product.formula} />
                               </span>
                             )}
                           </span>
-                          <span className="mt-1 block font-mono text-[11.5px] font-normal text-n-600">
+                          <span className="mt-1 block font-mono text-[11.5px] font-normal text-muted">
                             {product.unNumber}
                           </span>
                           <Link
                             href={removeHref(product.slug)}
-                            className="mt-1.5 inline-block text-[12.5px] font-normal text-gold-800 underline"
+                            className="mt-1.5 inline-block text-[12.5px] font-normal text-gold-link underline"
                           >
                             Remove
                           </Link>
@@ -128,10 +129,10 @@ export default async function ComparePage({
                           <Cell key={p.slug}>
                             {purity && purity !== "—" ? (
                               <>
-                                {purity} <span className="font-normal text-n-400">%</span>
+                                {purity} <span className="font-normal text-faint">%</span>
                               </>
                             ) : (
-                              <span className="text-n-600">—</span>
+                              <span className="text-muted">—</span>
                             )}
                           </Cell>
                         );
@@ -149,7 +150,7 @@ export default async function ComparePage({
                           const row = p.properties.find((r) => r.label === label);
                           return (
                             <Cell key={p.slug}>
-                              {row ? <PropertyValue value={row.value} /> : <span className="text-n-600">—</span>}
+                              {row ? <PropertyValue value={row.value} /> : <span className="text-muted">—</span>}
                             </Cell>
                           );
                         })}
@@ -163,7 +164,7 @@ export default async function ComparePage({
                     </Row>
                     <Row label="Hazard" zebra>
                       {selected.map((p) => (
-                        <td key={p.slug} className="px-5 py-3.5 text-right text-[14px] text-n-800">
+                        <td key={p.slug} className="px-5 py-3.5 text-right text-[14px] text-ink-2">
                           {p.hazardSummary}
                         </td>
                       ))}
@@ -183,7 +184,7 @@ export default async function ComparePage({
 
               {selected.length < MAX && (
                 <div className="flex flex-col gap-3">
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-n-600">
+                  <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted">
                     Add a product
                   </span>
                   <ul className="flex flex-wrap gap-2">
@@ -191,7 +192,7 @@ export default async function ComparePage({
                       <li key={product.slug}>
                         <Link
                           href={addHref(product.slug)}
-                          className="inline-flex h-9 items-center rounded-[3px] border border-n-100 px-3.5 text-[13.5px] text-n-800 hover:border-gold-600 hover:text-gold-800"
+                          className="inline-flex h-9 items-center rounded-full border border-line px-3.5 text-[13.5px] text-ink-2 hover:border-ink hover:text-gold-link"
                         >
                           {product.name}
                         </Link>
@@ -221,8 +222,8 @@ function Row({
   zebra?: boolean;
 }) {
   return (
-    <tr data-zebra className={`border-b border-n-100 last:border-0 ${zebra ? "bg-n-25" : ""}`}>
-      <th scope="row" className="px-5 py-3.5 text-left font-semibold">
+    <tr data-zebra className={`border-b border-line last:border-0 ${zebra ? "bg-surface" : ""}`}>
+      <th scope="row" className="px-5 py-3.5 text-left ">
         {label}
       </th>
       {children}
@@ -231,5 +232,5 @@ function Row({
 }
 
 function Cell({ children }: { children: React.ReactNode }) {
-  return <td className="px-5 py-3.5 text-right font-mono font-medium">{children}</td>;
+  return <td className="px-5 py-3.5 text-right font-mono ">{children}</td>;
 }

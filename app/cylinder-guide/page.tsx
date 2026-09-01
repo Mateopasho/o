@@ -53,15 +53,15 @@ export default function CylinderGuidePage() {
           <div className="lg:pl-10">
             {/* ------------------------------------------- Size chart --- */}
             <section id="size-chart" className="scroll-mt-[130px]">
-              <h2 className="mb-5 text-[22px] font-semibold tracking-[-0.018em] md:text-[26px]">
+              <h2 className="mb-5 text-[22px] tracking-[-0.018em] md:text-[30px] md:tracking-[-0.022em]">
                 Cylinder size chart
               </h2>
 
-              <div className="scroll-x mb-5 flex items-end gap-6 rounded-[4px] border border-n-100 bg-n-25 p-6 md:gap-8 md:p-8">
+              <div className="scroll-x mb-5 flex items-end gap-6 rounded-card border border-line bg-surface p-6 md:gap-8 md:p-8">
                 {LINEUP.map((item) => (
                   <div key={item.label} className="flex shrink-0 flex-col items-center gap-3">
                     <Cylinder shape={item.shape} height={item.height} bands={false} />
-                    <span className="font-mono text-xs text-n-600">{item.label}</span>
+                    <span className="font-mono text-xs text-muted">{item.label}</span>
                   </div>
                 ))}
               </div>
@@ -70,7 +70,7 @@ export default function CylinderGuidePage() {
                 <table className="w-full min-w-[780px] text-sm">
                   <caption className="sr-only">High-pressure cylinder dimensions and tare weights</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th>Size</Th>
                       <Th align="right">Height with cap</Th>
                       <Th align="right">Diameter</Th>
@@ -81,24 +81,24 @@ export default function CylinderGuidePage() {
                   </thead>
                   <tbody>
                     {cylinderSizes.map((row, i) => (
-                      <tr key={row.size} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                        <th scope="row" className="px-[18px] py-[13px] text-left font-semibold">{row.size}</th>
-                        <td className="px-[18px] py-[13px] text-right font-mono font-medium">
-                          <span className="block">{row.heightWithCap.mm} <span className="font-normal text-n-400">mm</span></span>
-                          <span className="block text-n-600">{row.heightWithCap.in} <span className="font-normal text-n-400">in</span></span>
+                      <tr key={row.size} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                        <th scope="row" className="px-[18px] py-[13px] text-left ">{row.size}</th>
+                        <td className="px-[18px] py-[13px] text-right font-mono ">
+                          <span className="block">{row.heightWithCap.mm} <span className="font-normal text-faint">mm</span></span>
+                          <span className="block text-muted">{row.heightWithCap.in} <span className="font-normal text-faint">in</span></span>
                         </td>
-                        <td className="px-[18px] py-[13px] text-right font-mono font-medium">
-                          <span className="block">{row.diameter.mm} <span className="font-normal text-n-400">mm</span></span>
-                          <span className="block text-n-600">{row.diameter.in} <span className="font-normal text-n-400">in</span></span>
+                        <td className="px-[18px] py-[13px] text-right font-mono ">
+                          <span className="block">{row.diameter.mm} <span className="font-normal text-faint">mm</span></span>
+                          <span className="block text-muted">{row.diameter.in} <span className="font-normal text-faint">in</span></span>
                         </td>
-                        <td className="px-[18px] py-[13px] text-right font-mono font-medium">
-                          {row.waterCapacity} <span className="font-normal text-n-400">L</span>
+                        <td className="px-[18px] py-[13px] text-right font-mono ">
+                          {row.waterCapacity} <span className="font-normal text-faint">L</span>
                         </td>
-                        <td className="px-[18px] py-[13px] text-right font-mono font-medium">
-                          <span className="block">{row.tare.kg} <span className="font-normal text-n-400">kg</span></span>
-                          <span className="block text-n-600">{row.tare.lb} <span className="font-normal text-n-400">lb</span></span>
+                        <td className="px-[18px] py-[13px] text-right font-mono ">
+                          <span className="block">{row.tare.kg} <span className="font-normal text-faint">kg</span></span>
+                          <span className="block text-muted">{row.tare.lb} <span className="font-normal text-faint">lb</span></span>
                         </td>
-                        <td className="px-[18px] py-[13px] font-mono text-n-800">{row.spec}</td>
+                        <td className="px-[18px] py-[13px] font-mono text-ink-2">{row.spec}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -108,10 +108,10 @@ export default function CylinderGuidePage() {
 
             {/* ----------------------------------------- TC/DOT marks --- */}
             <section id="tc-dot" className="scroll-mt-[130px]">
-              <h2 className="mb-2 text-[22px] font-semibold tracking-[-0.018em] md:text-[26px]">
+              <h2 className="mb-2 text-[22px] tracking-[-0.018em] md:text-[30px] md:tracking-[-0.022em]">
                 TC/DOT specification markings
               </h2>
-              <p className="mb-5 text-[15.5px] text-n-600">
+              <p className="mb-5 text-[15.5px] text-muted">
                 Stamped on the shoulder of every cylinder. TC is the Transport Canada
                 designation; DOT is the US equivalent.
               </p>
@@ -120,7 +120,7 @@ export default function CylinderGuidePage() {
                 <table className="w-full min-w-[720px] text-[14.5px]">
                   <caption className="sr-only">TC and DOT cylinder specification markings</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th>Marking</Th>
                       <Th>What it means</Th>
                       <Th>Example</Th>
@@ -128,10 +128,10 @@ export default function CylinderGuidePage() {
                   </thead>
                   <tbody>
                     {tcDotMarkings.map((row, i) => (
-                      <tr key={row.marking} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                        <th scope="row" className="px-[18px] py-3 text-left font-mono font-semibold">{row.marking}</th>
-                        <td className="px-[18px] py-3 text-n-800" style={{ textWrap: "pretty" }}>{row.meaning}</td>
-                        <td className="whitespace-nowrap px-[18px] py-3 font-mono text-n-800">{row.example}</td>
+                      <tr key={row.marking} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                        <th scope="row" className="px-[18px] py-3 text-left font-mono ">{row.marking}</th>
+                        <td className="px-[18px] py-3 text-ink-2" style={{ textWrap: "pretty" }}>{row.meaning}</td>
+                        <td className="whitespace-nowrap px-[18px] py-3 font-mono text-ink-2">{row.example}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -141,10 +141,10 @@ export default function CylinderGuidePage() {
 
             {/* -------------------------------------- CGA outlet chart --- */}
             <section id="cga-outlets" className="scroll-mt-[130px]">
-              <h2 className="mb-2 text-[22px] font-semibold tracking-[-0.018em] md:text-[26px]">
+              <h2 className="mb-2 text-[22px] tracking-[-0.018em] md:text-[30px] md:tracking-[-0.022em]">
                 CGA valve outlet connections
               </h2>
-              <p className="mb-5 max-w-[70ch] text-[15.5px] leading-[1.6] text-n-600">
+              <p className="mb-5 max-w-[70ch] text-[15.5px] leading-[1.6] text-muted">
                 Thread specifications per CGA V-1. Left-hand threads mark flammable service so a
                 fuel-gas regulator cannot be fitted to an oxidiser cylinder. Confirm the outlet
                 number on the valve before connecting anything.
@@ -154,7 +154,7 @@ export default function CylinderGuidePage() {
                 <table className="w-full min-w-[760px] text-[14.5px]">
                   <caption className="sr-only">CGA valve outlet connections with thread specifications</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th>CGA</Th>
                       <Th>Thread specification</Th>
                       <Th>Seal</Th>
@@ -163,15 +163,15 @@ export default function CylinderGuidePage() {
                   </thead>
                   <tbody>
                     {cgaOutlets.map((row, i) => (
-                      <tr key={row.cga} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                        <th scope="row" className="px-[18px] py-3 text-left font-mono font-semibold">{row.cga}</th>
-                        <td className="whitespace-nowrap px-[18px] py-3 font-mono text-n-800">
-                          {row.thread ?? <span className="text-n-600">—</span>}
+                      <tr key={row.cga} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                        <th scope="row" className="px-[18px] py-3 text-left font-mono ">{row.cga}</th>
+                        <td className="whitespace-nowrap px-[18px] py-3 font-mono text-ink-2">
+                          {row.thread ?? <span className="text-muted">—</span>}
                         </td>
-                        <td className="px-[18px] py-3 text-n-800">
-                          {row.seal ?? <span className="text-n-600">—</span>}
+                        <td className="px-[18px] py-3 text-ink-2">
+                          {row.seal ?? <span className="text-muted">—</span>}
                         </td>
-                        <td className="px-[18px] py-3 text-n-800" style={{ textWrap: "pretty" }}>{row.service}</td>
+                        <td className="px-[18px] py-3 text-ink-2" style={{ textWrap: "pretty" }}>{row.service}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -188,10 +188,10 @@ export default function CylinderGuidePage() {
 
             {/* --------------------------------- Regulator selection --- */}
             <section id="regulator-selection" className="scroll-mt-[130px]">
-              <h2 className="mb-2 text-[22px] font-semibold tracking-[-0.018em] md:text-[26px]">
+              <h2 className="mb-2 text-[22px] tracking-[-0.018em] md:text-[30px] md:tracking-[-0.022em]">
                 Regulator selection
               </h2>
-              <p className="mb-5 text-[15.5px] text-n-600">
+              <p className="mb-5 text-[15.5px] text-muted">
                 Match the regulator to the service, the delivery range and the outlet.
               </p>
 
@@ -199,7 +199,7 @@ export default function CylinderGuidePage() {
                 <table className="w-full min-w-[820px] text-[14.5px]">
                   <caption className="sr-only">Regulator selection by service</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th>Service</Th>
                       <Th>Type</Th>
                       <Th align="right">Delivery range</Th>
@@ -209,12 +209,12 @@ export default function CylinderGuidePage() {
                   </thead>
                   <tbody>
                     {regulatorSelection.map((row, i) => (
-                      <tr key={row.service} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                        <th scope="row" className="px-[18px] py-3 text-left font-semibold">{row.service}</th>
-                        <td className="px-[18px] py-3 text-n-800">{row.stages}</td>
-                        <td className="whitespace-nowrap px-[18px] py-3 text-right font-mono font-medium">{row.deliveryRange}</td>
-                        <td className="px-[18px] py-3 font-mono font-medium">{row.cga}</td>
-                        <td className="px-[18px] py-3 text-n-800" style={{ textWrap: "pretty" }}>{row.note}</td>
+                      <tr key={row.service} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                        <th scope="row" className="px-[18px] py-3 text-left ">{row.service}</th>
+                        <td className="px-[18px] py-3 text-ink-2">{row.stages}</td>
+                        <td className="whitespace-nowrap px-[18px] py-3 text-right font-mono ">{row.deliveryRange}</td>
+                        <td className="px-[18px] py-3 font-mono ">{row.cga}</td>
+                        <td className="px-[18px] py-3 text-ink-2" style={{ textWrap: "pretty" }}>{row.note}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -224,10 +224,10 @@ export default function CylinderGuidePage() {
 
             {/* ------------------------------------- Requalification --- */}
             <section id="requalification" className="scroll-mt-[130px]">
-              <h2 className="mb-2 text-[22px] font-semibold tracking-[-0.018em] md:text-[26px]">
+              <h2 className="mb-2 text-[22px] tracking-[-0.018em] md:text-[30px] md:tracking-[-0.022em]">
                 Requalification intervals
               </h2>
-              <p className="mb-5 text-[15.5px] text-n-600">
+              <p className="mb-5 text-[15.5px] text-muted">
                 Under CSA B339/B340. The requalification date is stamped on the cylinder shoulder.
               </p>
 
@@ -235,7 +235,7 @@ export default function CylinderGuidePage() {
                 <table className="w-full min-w-[720px] text-[14.5px]">
                   <caption className="sr-only">Cylinder requalification intervals</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th>Container type</Th>
                       <Th>Interval</Th>
                       <Th>Method</Th>
@@ -244,11 +244,11 @@ export default function CylinderGuidePage() {
                   </thead>
                   <tbody>
                     {requalification.map((row, i) => (
-                      <tr key={row.containerType} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                        <th scope="row" className="px-[18px] py-3 text-left font-semibold">{row.containerType}</th>
-                        <td className="whitespace-nowrap px-[18px] py-3 font-mono font-medium">{row.interval}</td>
-                        <td className="px-[18px] py-3 text-n-800">{row.method}</td>
-                        <td className="whitespace-nowrap px-[18px] py-3 text-n-800">{row.standard}</td>
+                      <tr key={row.containerType} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                        <th scope="row" className="px-[18px] py-3 text-left ">{row.containerType}</th>
+                        <td className="whitespace-nowrap px-[18px] py-3 font-mono ">{row.interval}</td>
+                        <td className="px-[18px] py-3 text-ink-2">{row.method}</td>
+                        <td className="whitespace-nowrap px-[18px] py-3 text-ink-2">{row.standard}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -258,10 +258,10 @@ export default function CylinderGuidePage() {
 
             {/* ---------------------------------- Colour conventions --- */}
             <section id="colour" className="scroll-mt-[130px]">
-              <h2 className="mb-2 text-[22px] font-semibold tracking-[-0.018em] md:text-[26px]">
+              <h2 className="mb-2 text-[22px] tracking-[-0.018em] md:text-[30px] md:tracking-[-0.022em]">
                 Cylinder colour conventions
               </h2>
-              <p className="mb-5 text-[15.5px] text-n-600">
+              <p className="mb-5 text-[15.5px] text-muted">
                 Listed for orientation only. Read the label, every time.
               </p>
 
@@ -269,16 +269,16 @@ export default function CylinderGuidePage() {
                 <table className="w-full text-[14.5px]">
                   <caption className="sr-only">Common cylinder colour conventions</caption>
                   <thead>
-                    <tr className="bg-n-25 text-n-900">
+                    <tr className="bg-surface text-ink">
                       <Th>Gas</Th>
                       <Th>Common colour</Th>
                     </tr>
                   </thead>
                   <tbody>
                     {colourConventions.map((row, i) => (
-                      <tr key={row.gas} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                        <th scope="row" className="px-[18px] py-3 text-left font-semibold">{row.gas}</th>
-                        <td className="px-[18px] py-3 text-n-800">{row.colour}</td>
+                      <tr key={row.gas} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                        <th scope="row" className="px-[18px] py-3 text-left ">{row.gas}</th>
+                        <td className="px-[18px] py-3 text-ink-2">{row.colour}</td>
                       </tr>
                     ))}
                   </tbody>

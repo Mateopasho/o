@@ -5,7 +5,7 @@ import { SiteFooter, MobileTabBar } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
 import { MobileFilterDrawer } from "@/components/mobile-filter-drawer";
 import { Breadcrumb, MonoLabel } from "@/components/ui";
-import { products } from "@/lib/data/products";
+import { getProducts } from "@/lib/catalogue";
 import {
   categories, categoryBySlug, containerTypes, gradeTiers,
   tdgClassFilters, processFilters,
@@ -41,6 +41,7 @@ export default async function CataloguePage({
 }) {
   const params = await searchParams;
   const state = parseParams(params);
+  const products = await getProducts();
 
   const facets = products.map(toFacet);
   const filtered = products.filter((p, i) => matchesFacet(facets[i], state));
@@ -117,15 +118,15 @@ export default async function CataloguePage({
             ]}
           />
 
-          <div className="mt-[18px] flex flex-col gap-4 border-b border-n-100 pb-[26px] md:flex-row md:items-end md:justify-between">
+          <div className="mt-[18px] flex flex-col gap-4 border-b border-line pb-[26px] md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="mb-2.5 text-[32px] font-semibold tracking-[-0.022em] md:text-[40px]">
+              <h1 className="mb-3 text-[36px] leading-[1.04] tracking-[-0.028em] md:text-[60px] md:leading-[1.02] md:tracking-[-0.032em]">
                 {heading}
               </h1>
-              <p className="text-base text-n-700">
+              <p className="text-base text-muted">
                 Showing{" "}
-                <span className="font-mono font-medium text-n-900">{sorted.length}</span> of{" "}
-                <span className="font-mono font-medium text-n-900">
+                <span className="font-mono text-ink">{sorted.length}</span> of{" "}
+                <span className="font-mono text-ink">
                   {site.stats.publishedProducts}
                 </span>{" "}
                 products
@@ -141,19 +142,19 @@ export default async function CataloguePage({
                   <input key={`${chip.key}-${chip.value}`} type="hidden" name={chip.key} value={chip.value} />
                 ))}
                 {state.q && <input type="hidden" name="q" value={state.q} />}
-                <label htmlFor="sort" className="hidden text-sm text-n-600 sm:block">Sort</label>
+                <label htmlFor="sort" className="hidden text-sm text-muted sm:block">Sort</label>
                 <select
                   id="sort"
                   name="sort"
                   defaultValue={state.sort}
-                  className="inline-flex h-11 items-center rounded-[3px] border border-n-200 bg-white px-3 text-[13.5px] font-medium md:px-3.5 md:text-sm"
+                  className="inline-flex h-11 items-center rounded-full border border-line bg-white px-3 text-[13.5px] md:px-3.5 md:text-sm"
                 >
                   <option value="name">Name A–Z</option>
                   <option value="sizes">Most configurations</option>
                 </select>
                 <button
                   type="submit"
-                  className="inline-flex h-11 items-center rounded-[3px] border border-n-200 px-3 text-[13.5px] font-medium md:px-3.5 md:text-sm"
+                  className="inline-flex h-11 items-center rounded-full border border-line px-3 text-[13.5px] md:px-3.5 md:text-sm"
                 >
                   Apply
                 </button>
@@ -165,9 +166,9 @@ export default async function CataloguePage({
         <div className="gutter grid gap-10 pb-16 pt-7 lg:grid-cols-[272px_1fr]">
           {/* ---------------------------- Desktop rail (lg and above) ------ */}
           <aside aria-label="Filters" className="hidden flex-col gap-[26px] lg:flex">
-            <form action="/gases" role="search" className="flex h-11 items-center gap-2.5 rounded-[3px] border border-n-200 px-3.5">
+            <form action="/gases" role="search" className="flex h-11 items-center gap-2.5 rounded-full border border-line px-3.5">
               <label htmlFor="catalogue-search" className="sr-only">Search products</label>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5c626b" strokeWidth="2" aria-hidden="true" className="shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E6B64" strokeWidth="2" aria-hidden="true" className="shrink-0">
                 <circle cx="11" cy="11" r="7" />
                 <path d="M16 16l5 5" />
               </svg>
@@ -185,7 +186,7 @@ export default async function CataloguePage({
               <fieldset
                 key={group.key}
                 className={`flex flex-col gap-3 ${
-                  gi < groups.length - 1 ? "border-b border-n-100 pb-[22px]" : ""
+                  gi < groups.length - 1 ? "border-b border-line pb-[22px]" : ""
                 }`}
               >
                 <legend className="mb-0.5"><MonoLabel>{group.label}</MonoLabel></legend>
@@ -196,15 +197,15 @@ export default async function CataloguePage({
                       key={option.value}
                       href={removeHref(group.key, option.value)}
                       aria-pressed={checked}
-                      className="flex items-center justify-between gap-2 text-[14.5px] text-n-900 hover:text-n-900"
+                      className="flex items-center justify-between gap-2 text-[14.5px] text-ink hover:text-ink"
                     >
                       <span className="flex items-center gap-2.5">
                         <span
                           aria-hidden="true"
-                          className={`inline-flex size-[17px] shrink-0 items-center justify-center rounded-[2px] border ${
+                          className={`inline-flex size-[17px] shrink-0 items-center justify-center rounded-[5px] border ${
                             checked
-                              ? "border-gold-600 bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%]"
-                              : "border-n-200"
+                              ? "border-ink bg-ink"
+                              : "border-line"
                           }`}
                         >
                           {checked && (
@@ -216,7 +217,7 @@ export default async function CataloguePage({
                         {option.label}
                       </span>
                       {option.count !== undefined && (
-                        <span className="font-mono text-xs text-n-600">{option.count}</span>
+                        <span className="font-mono text-xs text-muted">{option.count}</span>
                       )}
                     </Link>
                   );
@@ -228,9 +229,9 @@ export default async function CataloguePage({
           {/* -------------------------------------------------- Results ---- */}
           <div>
             {/* Mobile search sits above the grid; the rail's copy is hidden. */}
-            <form action="/gases" role="search" className="mb-5 flex h-11 items-center gap-2.5 rounded-[3px] border border-n-200 px-3.5 lg:hidden">
+            <form action="/gases" role="search" className="mb-5 flex h-11 items-center gap-2.5 rounded-full border border-line px-3.5 lg:hidden">
               <label htmlFor="catalogue-search-mobile" className="sr-only">Search products</label>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5c626b" strokeWidth="2" aria-hidden="true" className="shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E6B64" strokeWidth="2" aria-hidden="true" className="shrink-0">
                 <circle cx="11" cy="11" r="7" />
                 <path d="M16 16l5 5" />
               </svg>
@@ -250,17 +251,17 @@ export default async function CataloguePage({
                   <Link
                     key={`${chip.key}-${chip.value}`}
                     href={removeHref(chip.key, chip.value)}
-                    className="inline-flex h-9 items-center gap-[9px] rounded-[3px] bg-gold-100 pl-3.5 pr-[9px] text-[13.5px] font-medium text-gold-800"
+                    className="inline-flex h-9 items-center gap-[9px] rounded-full bg-gold-ribbon pl-3.5 pr-[9px] text-[13.5px] text-gold-link"
                   >
                     {chip.label}
-                    <svg width="11" height="11" viewBox="0 0 24 24" stroke="#816412" strokeWidth="3" aria-hidden="true">
+                    <svg width="11" height="11" viewBox="0 0 24 24" stroke="#7E6413" strokeWidth="3" aria-hidden="true">
                       <path d="M5 5l14 14M19 5L5 19" />
                     </svg>
                     <span className="sr-only">Remove filter</span>
                   </Link>
                 ))}
                 {activeCount(state) > 0 && (
-                  <Link href="/gases" className="text-[13.5px] text-n-600 underline">
+                  <Link href="/gases" className="text-[13.5px] text-muted underline">
                     Clear all
                   </Link>
                 )}
@@ -277,15 +278,15 @@ export default async function CataloguePage({
               </ul>
             ) : (
               /* Design system 7.2 — empty state. */
-              <div className="flex flex-col items-start gap-4 rounded-[4px] border border-n-100 bg-n-25 px-8 py-12">
-                <p className="text-[17px] font-medium text-n-900">
+              <div className="flex flex-col items-start gap-4 rounded-card border border-line bg-surface px-8 py-12">
+                <p className="text-[17px] text-ink">
                   No products match these filters.
                 </p>
-                <p className="max-w-[46ch] text-[15px] leading-[1.65] text-n-600">
+                <p className="max-w-[46ch] text-[15px] leading-[1.65] text-muted">
                   We fill more than the catalogue publishes. Tell us the application and the
                   grade you need and the order desk will match it.
                 </p>
-                <Link href="/quote" className="text-[15px] font-medium text-gold-800">
+                <Link href="/quote" className="text-[15px] text-gold-link">
                   Tell us what you need →
                 </Link>
               </div>

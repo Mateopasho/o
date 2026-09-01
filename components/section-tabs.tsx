@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 
 /**
  * Product-page section tabs.
@@ -32,20 +33,33 @@ export interface Panel {
 }
 
 const PRINT_ICON = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#816412" strokeWidth="2" aria-hidden="true">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7E6413" strokeWidth="2" aria-hidden="true">
     <path d="M6 9V3h12v6M6 18H4v-6h16v6h-2M8 14h8v7H8z" />
   </svg>
 );
 
 export function SectionTabs({ panels }: { panels: Panel[] }) {
   const [active, setActive] = useState(panels[0]?.id ?? "");
+  const params = useSearchParams();
+
+  /**
+   * Tabs are addressable via `?section=`, so a link elsewhere on the site can
+   * open the record on a specific panel — the home page's hero card links
+   * straight to Grades or Packages this way. Read on mount rather than held in
+   * the URL on every click: switching tabs should not push history entries the
+   * back button then has to walk through.
+   */
+  useEffect(() => {
+    const wanted = params.get("section");
+    if (wanted && panels.some((p) => p.id === wanted)) setActive(wanted);
+  }, [params, panels]);
 
   return (
     <>
       {/* Tab bar. Sticks under the 76px site header. */}
       <div
         data-print="hide"
-        className="sticky top-[76px] z-50 border-y border-n-100 bg-n-25"
+        className="sticky top-[76px] z-50 border-y border-line bg-surface"
       >
         <div
           role="tablist"
@@ -78,8 +92,8 @@ export function SectionTabs({ panels }: { panels: Panel[] }) {
                 }}
                 className={`shrink-0 cursor-pointer whitespace-nowrap border-b-2 py-4 transition-colors duration-150 md:py-0 md:leading-[54px] ${
                   selected
-                    ? "border-gold-600 font-medium text-gold-800"
-                    : "border-transparent text-n-800 hover:text-gold-800"
+                    ? "border-ink text-gold-link"
+                    : "border-transparent text-ink-2 hover:text-gold-link"
                 }`}
               >
                 {panel.label}
@@ -90,7 +104,7 @@ export function SectionTabs({ panels }: { panels: Panel[] }) {
           <button
             type="button"
             onClick={() => window.print()}
-            className="ml-auto hidden shrink-0 cursor-pointer items-center gap-[9px] font-medium text-gold-800 lg:inline-flex"
+            className="ml-auto hidden shrink-0 cursor-pointer items-center gap-[9px] text-gold-link lg:inline-flex"
           >
             {PRINT_ICON}
             Print spec sheet

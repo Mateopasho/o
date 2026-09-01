@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Archivo, IBM_Plex_Mono } from "next/font/google";
+import { Schibsted_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Reveal } from "@/components/reveal";
 
 /**
- * Typography.
+ * Typography — premium reformat.
  *
- * The design system document names IBM Plex Sans, but every screen in the design
- * document loads Archivo for interface and prose. The screens are authoritative
- * for a 1:1 build, so Archivo is used with IBM Plex Mono for all tabular figures
- * — Plex Mono is natively tabular, so specification numbers align in a column
- * without a font-feature override.
+ * One grotesk at a single weight. Schibsted Grotesk replaces Archivo, loaded at
+ * 400 and 500 only: the premium document uses font-weight:400 for every single
+ * element including 76px headings, so there is deliberately no bold to reach
+ * for. Hierarchy comes from size and letter-spacing instead.
+ *
+ * IBM Plex Mono still carries every figure that sits in a column — it is
+ * natively tabular, so specification numbers align without a feature override.
  */
-const archivo = Archivo({
+const grotesk = Schibsted_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-archivo",
+  weight: ["400", "500"],
+  variable: "--font-grotesk",
   display: "swap",
 });
 
@@ -43,11 +45,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-CA" className={`${archivo.variable} ${plexMono.variable}`}>
+    <html lang="en-CA" className={`${grotesk.variable} ${plexMono.variable}`}>
       <body>
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-100 focus:rounded-[3px] focus:bg-white focus:px-4 focus:py-3 focus:text-n-900 focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-white focus:px-4 focus:py-3 focus:text-ink focus:shadow-lg"
         >
           Skip to content
         </a>

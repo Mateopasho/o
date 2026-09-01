@@ -8,18 +8,19 @@ import { GhsIcon } from "@/components/ghs";
 import { SectionTabs } from "@/components/section-tabs";
 import { RelatedTile } from "@/components/product-card";
 import {
-  Breadcrumb, MonoLabel, PrimaryButton, SecondaryButton, QuoteButton,
+  Breadcrumb, MonoLabel, PrimaryButton, QuietLink, QuoteButton,
   AvailabilityTag, HazardCallout, InfoNote, TableFrame, Th,
 } from "@/components/ui";
 import { DualCell, Formula, PropertyValue, type UnitMode } from "@/lib/format";
-import { products, productBySlug, relatedProducts } from "@/lib/data/products";
+import { getProducts, getProductBySlug, getRelatedProducts } from "@/lib/catalogue";
 import { categoryBySlug } from "@/lib/data/categories";
 import { productImage, packageImage } from "@/lib/data/images";
 import { site } from "@/lib/data/site";
 import { maxPurity } from "@/lib/types";
 
 /** Pre-render every published product. Drafts are absent, so they 404. */
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await getProducts();
   return products.map((p) => ({ category: p.categorySlug, slug: p.slug }));
 }
 
@@ -29,7 +30,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = productBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return {};
   return {
     title: `${product.name} — ${product.unNumber}`,
@@ -38,13 +39,13 @@ export async function generateMetadata({
 }
 
 const PHONE_ICON = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#816412" strokeWidth="2" aria-hidden="true">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E6413" strokeWidth="2" aria-hidden="true">
     <path d="M4 5c0 8 7 15 15 15l3-3-4-3-2 2c-3-1-6-4-7-7l2-2-3-4z" />
   </svg>
 );
 
 const DOWNLOAD_ICON = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#816412" strokeWidth="2" aria-hidden="true">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E6413" strokeWidth="2" aria-hidden="true">
     <path d="M12 3v12M7 11l5 5 5-5M4 20h16" />
   </svg>
 );
@@ -58,12 +59,12 @@ export default async function ProductPage({
 }) {
   const { category, slug } = await params;
   const sp = await searchParams;
-  const product = productBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product || product.categorySlug !== category) notFound();
 
   const cat = categoryBySlug(product.categorySlug);
-  const related = relatedProducts(product);
+  const related = await getRelatedProducts(product);
   const purity = maxPurity(product);
 
   const unitsParam = Array.isArray(sp.units) ? sp.units[0] : sp.units;
@@ -118,7 +119,7 @@ export default async function ProductPage({
 
         <section className="gutter grid gap-8 pb-10 pt-8 lg:grid-cols-[400px_1fr] lg:gap-14">
           <div>
-            <div className="relative h-[236px] overflow-hidden rounded-[4px] border border-n-100 bg-n-25 md:h-[380px]">
+            <div className="relative h-[236px] overflow-hidden rounded-card border border-line bg-surface md:h-[380px]">
               <Image
                 src={hero.src}
                 alt={hero.alt}
@@ -129,7 +130,7 @@ export default async function ProductPage({
                 className="size-full object-cover"
               />
               {primary && (
-                <span className="absolute left-3.5 top-3.5 rounded-[2px] bg-white/90 px-2 py-1 font-mono text-[9.5px] uppercase tracking-[0.12em] text-n-600 md:text-[10px]">
+                <span className="absolute left-3.5 top-3.5 rounded-full bg-white/90 px-2 py-1 font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted md:text-[10px]">
                   Size {primary.size} · {primary.spec}
                 </span>
               )}
@@ -146,8 +147,8 @@ export default async function ProductPage({
                 return (
                   <li key={pack.sku}>
                     <span
-                      className={`block overflow-hidden rounded-[3px] border ${
-                        i === 0 ? "border-gold-600" : "border-n-100"
+                      className={`block overflow-hidden rounded-full border ${
+                        i === 0 ? "border-ink" : "border-line"
                       }`}
                     >
                       <Image
@@ -159,7 +160,7 @@ export default async function ProductPage({
                         className="aspect-square w-full object-cover"
                       />
                     </span>
-                    <span className="mt-1 block truncate font-mono text-[9.5px] text-n-600">
+                    <span className="mt-1 block truncate font-mono text-[9.5px] text-muted">
                       {pack.size}
                     </span>
                   </li>
@@ -170,47 +171,47 @@ export default async function ProductPage({
 
           <div>
             <div className="mb-3.5 flex flex-wrap items-center gap-2 md:gap-3">
-              <span className="rounded-[2px] bg-gold-100 px-2.5 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-gold-800">
+              <span className="rounded-full bg-gold-ribbon px-2.5 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-gold-link">
                 {cat?.shortName}
               </span>
-              <span className="inline-flex items-center gap-[7px] rounded-[3px] bg-n-100 px-3 py-1.5 text-[12px] font-medium text-n-900 md:text-[13px]">
-                <span className="size-[7px] rounded-full bg-n-600" />
+              <span className="inline-flex items-center gap-[7px] rounded-full bg-surface-2 px-3 py-1.5 text-[12px] text-ink md:text-[13px]">
+                <span className="size-[7px] rounded-full bg-faint" />
                 {product.tdgClass} {product.tdgClass.startsWith("2.1") ? "Flammable" : product.tdgClass.startsWith("2.3") ? "Toxic" : product.tdgClass === "9" ? "Misc." : "Non-flammable"}
               </span>
               {product.safety.oxygenDisplacementWarning && (
-                <span className="inline-flex items-center gap-[7px] rounded-[3px] bg-n-100 px-3 py-1.5 text-[12px] font-medium text-n-900 md:text-[13px]">
-                  <span className="size-[7px] rounded-full bg-n-600" />
+                <span className="inline-flex items-center gap-[7px] rounded-full bg-surface-2 px-3 py-1.5 text-[12px] text-ink md:text-[13px]">
+                  <span className="size-[7px] rounded-full bg-faint" />
                   Simple asphyxiant
                 </span>
               )}
             </div>
 
-            <h1 className="mb-3 text-[34px] font-semibold leading-[1.04] tracking-[-0.025em] md:text-[52px]">
+            <h1 className="mb-3 text-[34px] leading-[1.04] tracking-[-0.025em] md:text-[52px]">
               {product.name}{" "}
               {product.formula && (
-                <span className="font-mono text-xl font-normal text-n-600 md:text-[30px]">
+                <span className="font-mono text-xl font-normal text-muted md:text-[34px] md:tracking-[-0.024em]">
                   <Formula value={product.formula} />
                 </span>
               )}
             </h1>
 
-            <p className="mb-[26px] max-w-[540px] text-[15.5px] leading-[1.55] text-n-800 md:text-[18px]" style={{ textWrap: "pretty" }}>
+            <p className="mb-[26px] max-w-[540px] text-[15.5px] leading-[1.55] text-ink-2 md:text-[18px]" style={{ textWrap: "pretty" }}>
               {product.tagline}
             </p>
 
             {/* GHS signal word + hazard statements */}
             {product.signalWord && (
-              <div className="mb-[26px] flex flex-col gap-3.5 border-y border-n-100 py-[18px] md:flex-row md:items-center md:gap-5">
+              <div className="mb-[26px] flex flex-col gap-3.5 border-y border-line py-[18px] md:flex-row md:items-center md:gap-5">
                 {product.pictograms[0] && <GhsIcon type={product.pictograms[0]} size={52} />}
                 <div className="flex flex-col gap-1">
                   <MonoLabel>GHS signal word</MonoLabel>
-                  <span className="text-base font-semibold">{product.signalWord}</span>
+                  <span className="text-base ">{product.signalWord}</span>
                 </div>
-                <div className="flex flex-col gap-1 md:border-l md:border-n-100 md:pl-5">
+                <div className="flex flex-col gap-1 md:border-l md:border-line md:pl-5">
                   <MonoLabel>Hazard statements</MonoLabel>
                   <ul className="flex flex-col gap-1">
                     {product.hazardStatements.map((h) => (
-                      <li key={h} className="text-[13.5px] text-n-800 md:text-[14.5px]">{h}</li>
+                      <li key={h} className="text-[13.5px] text-ink-2 md:text-[14.5px]">{h}</li>
                     ))}
                   </ul>
                 </div>
@@ -220,25 +221,25 @@ export default async function ProductPage({
             {/* 4 CTA cluster — quote, call, SDS, compare. No price, no cart. */}
             <div className="flex flex-col gap-3 md:flex-row md:flex-wrap" data-print="hide">
               <PrimaryButton href={`/quote?product=${product.slug}`} size="lg">Request a Quote</PrimaryButton>
-              <SecondaryButton href={site.orderDesk.phoneHref} size="lg">
+              <QuietLink href={site.orderDesk.phoneHref}>
                 {PHONE_ICON}{site.orderDesk.phone}
-              </SecondaryButton>
-              <SecondaryButton href="/safety#sds" size="lg">
+              </QuietLink>
+              <QuietLink href="/safety#sds">
                 {DOWNLOAD_ICON}Download SDS
-              </SecondaryButton>
-              <SecondaryButton href={`/gases/compare?p=${product.slug}`} size="lg">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5c626b" strokeWidth="2" aria-hidden="true">
+              </QuietLink>
+              <QuietLink href={`/gases/compare?p=${product.slug}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6B64" strokeWidth="2" aria-hidden="true">
                   <path d="M4 6h7v12H4zM13 6h7v12h-7z" />
                 </svg>
                 Compare
-              </SecondaryButton>
+              </QuietLink>
             </div>
           </div>
         </section>
 
         {/* ------------------------------------------ 3 Key facts strip --- */}
         <section className="gutter pb-9" aria-label="Key facts">
-          <dl className="grid grid-cols-2 overflow-hidden rounded-[4px] border border-n-100 md:grid-cols-3 lg:grid-cols-6">
+          <dl className="grid grid-cols-2 overflow-hidden rounded-card border border-line md:grid-cols-3 lg:grid-cols-6">
             <KeyFact label="UN number" value={product.unNumber} />
             <KeyFact label="CAS" value={product.cas ?? "—"} />
             <KeyFact label="TDG class" value={product.tdgClass} />
@@ -257,12 +258,12 @@ export default async function ProductPage({
             <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:gap-14">
               <div className="flex max-w-[680px] flex-col gap-4">
                 {product.overview.map((para, i) => (
-                  <p key={i} className="text-[15.5px] leading-[1.7] text-n-800 md:text-[16.5px]" style={{ textWrap: "pretty" }}>
+                  <p key={i} className="text-[15.5px] leading-[1.7] text-ink-2 md:text-[16.5px]" style={{ textWrap: "pretty" }}>
                     {para}
                   </p>
                 ))}
               </div>
-              <dl className="flex flex-col gap-[18px] self-start rounded-[4px] border border-n-100 bg-n-25 p-[22px]">
+              <dl className="flex flex-col gap-[18px] self-start rounded-card border border-line bg-surface p-[22px]">
                 <div className="flex flex-col gap-[5px]">
                   <dt><MonoLabel>Synonyms</MonoLabel></dt>
                   <dd className="text-[14.5px] leading-[1.5]">{product.synonyms}</dd>
@@ -291,25 +292,25 @@ export default async function ProductPage({
               <table className="w-full min-w-[640px] text-[14.5px]">
                 <caption className="sr-only">{product.name} grades and impurity limits</caption>
                 <thead>
-                  <tr className="bg-n-25 text-n-900">
+                  <tr className="bg-surface text-ink">
                     <Th className="w-[240px]">Grade</Th>
                     {product.grades.map((g) => (
-                      <th key={g.name} scope="col" className="px-5 py-[15px] text-right text-[15px] font-semibold">
+                      <th key={g.name} scope="col" className="px-5 py-[15px] text-right text-[15px] ">
                         {g.name}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-n-100">
-                    <th scope="row" className="px-5 py-3.5 text-left font-semibold">Minimum purity</th>
+                  <tr className="border-b border-line">
+                    <th scope="row" className="px-5 py-3.5 text-left ">Minimum purity</th>
                     {product.grades.map((g) => (
-                      <td key={g.name} className="px-5 py-3.5 text-right font-mono font-medium">
+                      <td key={g.name} className="px-5 py-3.5 text-right font-mono ">
                         {g.minPurity === "—" ? (
-                          <span className="text-n-600">—</span>
+                          <span className="text-muted">—</span>
                         ) : (
                           <>
-                            {g.minPurity} <span className="font-normal text-n-400">%</span>
+                            {g.minPurity} <span className="font-normal text-faint">%</span>
                           </>
                         )}
                       </td>
@@ -318,21 +319,21 @@ export default async function ProductPage({
 
                   {product.impuritySpecies.length > 0 && (
                     <>
-                      <tr data-zebra className="border-b border-n-100 bg-n-25">
-                        <td colSpan={product.grades.length + 1} className="px-5 py-[11px] font-mono text-[10.5px] uppercase tracking-[0.12em] text-n-600">
+                      <tr data-zebra className="border-b border-line bg-surface">
+                        <td colSpan={product.grades.length + 1} className="px-5 py-[11px] font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted">
                           Impurity limits — maximum ppm
                         </td>
                       </tr>
                       {product.impuritySpecies.map((species, i) => (
-                        <tr key={species.key} data-zebra className={`border-b border-n-100 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                          <th scope="row" className="py-[13px] pl-9 pr-5 text-left font-normal text-n-800">
+                        <tr key={species.key} data-zebra className={`border-b border-line ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                          <th scope="row" className="py-[13px] pl-9 pr-5 text-left font-normal text-ink-2">
                             {species.formula ? <Formula value={species.formula} /> : species.label}
                           </th>
                           {product.grades.map((g) => {
                             const v = g.impurities[species.key];
                             return (
                               <td key={g.name} className="px-5 py-[13px] text-right font-mono">
-                                {v ? <span className="font-medium">{v}</span> : <span className="text-n-600">—</span>}
+                                {v ? <span className="">{v}</span> : <span className="text-muted">—</span>}
                               </td>
                             );
                           })}
@@ -341,19 +342,19 @@ export default async function ProductPage({
                     </>
                   )}
 
-                  <tr className="border-b border-n-100">
-                    <th scope="row" className="px-5 py-3.5 text-left font-semibold">Conforms to</th>
+                  <tr className="border-b border-line">
+                    <th scope="row" className="px-5 py-3.5 text-left ">Conforms to</th>
                     {product.grades.map((g) => (
-                      <td key={g.name} className="px-5 py-3.5 text-right text-sm text-n-800">
-                        {g.conformsTo ?? <span className="text-n-600">—</span>}
+                      <td key={g.name} className="px-5 py-3.5 text-right text-sm text-ink-2">
+                        {g.conformsTo ?? <span className="text-muted">—</span>}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <th scope="row" className="px-5 py-3.5 text-left font-semibold">Certificate of analysis</th>
+                    <th scope="row" className="px-5 py-3.5 text-left ">Certificate of analysis</th>
                     {product.grades.map((g) => (
-                      <td key={g.name} className="px-5 py-3.5 text-right text-sm text-n-800">
-                        {g.certificateOfAnalysis ?? <span className="text-n-600">—</span>}
+                      <td key={g.name} className="px-5 py-3.5 text-right text-sm text-ink-2">
+                        {g.certificateOfAnalysis ?? <span className="text-muted">—</span>}
                       </td>
                     ))}
                   </tr>
@@ -368,24 +369,24 @@ export default async function ProductPage({
           <Section id="packages">
             <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 className="mb-2 text-2xl font-semibold tracking-[-0.018em] md:text-[28px]">
+                <h2 className="mb-2 text-2xl tracking-[-0.018em] md:text-[32px] md:tracking-[-0.022em]">
                   Cylinder &amp; package options
                 </h2>
-                <p className="text-[15.5px] text-n-600">
+                <p className="text-[15.5px] text-muted">
                   {product.packages.length} configuration{product.packages.length === 1 ? "" : "s"}.
                   Every row quotes individually — no prices are published.
                 </p>
               </div>
 
               {/* Unit toggle lives in the URL so a chosen view is shareable. */}
-              <div className="inline-flex shrink-0 overflow-hidden rounded-[3px] border border-n-200" role="group" aria-label="Unit system">
+              <div className="inline-flex shrink-0 overflow-hidden rounded-full border border-line" role="group" aria-label="Unit system">
                 {(["both", "metric", "imperial"] as UnitMode[]).map((mode) => (
                   <Link
                     key={mode}
                     href={`${basePath}${mode === "both" ? "" : `?units=${mode}`}#packages`}
                     aria-current={units === mode ? "true" : undefined}
                     className={`inline-flex h-10 items-center px-3.5 font-mono text-xs uppercase tracking-[0.06em] ${
-                      units === mode ? "bg-n-25 text-n-900" : "text-n-800"
+                      units === mode ? "bg-surface text-ink" : "text-ink-2"
                     }`}
                   >
                     {mode}
@@ -399,7 +400,7 @@ export default async function ProductPage({
               <table className="w-full min-w-[860px] text-sm">
                 <caption className="sr-only">{product.name} package configurations</caption>
                 <thead>
-                  <tr className="bg-n-25 text-n-900">
+                  <tr className="bg-surface text-ink">
                     <Th>Size</Th>
                     <Th>Container / spec</Th>
                     <Th align="right">Contents</Th>
@@ -412,28 +413,28 @@ export default async function ProductPage({
                 </thead>
                 <tbody>
                   {product.packages.map((pack, i) => (
-                    <tr key={pack.sku} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
+                    <tr key={pack.sku} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
                       <td className="px-[18px] py-[13px]">
-                        <span className="block font-semibold">{pack.size}</span>
-                        <span className="font-mono text-[11.5px] text-n-600">{pack.sku}</span>
+                        <span className="block ">{pack.size}</span>
+                        <span className="font-mono text-[11.5px] text-muted">{pack.sku}</span>
                       </td>
-                      <td className="px-[18px] py-[13px] text-n-800">
+                      <td className="px-[18px] py-[13px] text-ink-2">
                         <span className="block">{pack.container}</span>
-                        <span className="font-mono text-[11.5px] text-n-600">{pack.spec}</span>
+                        <span className="font-mono text-[11.5px] text-muted">{pack.spec}</span>
                       </td>
-                      <td className="px-[18px] py-[13px] text-right font-mono font-medium">
+                      <td className="px-[18px] py-[13px] text-right font-mono ">
                         <DualCell value={pack.contents} mode={units} />
                       </td>
-                      <td className="px-[18px] py-[13px] text-right font-mono font-medium">
+                      <td className="px-[18px] py-[13px] text-right font-mono ">
                         {pack.fillPressure.metric === "—" ? (
-                          <span className="text-n-600">—</span>
+                          <span className="text-muted">—</span>
                         ) : (
                           <DualCell value={pack.fillPressure} mode={units} />
                         )}
                       </td>
-                      <td className="px-[18px] py-[13px] font-mono font-medium">{pack.cga}</td>
-                      <td className="px-[18px] py-[13px] text-right font-mono font-medium">
-                        {pack.tare ? <DualCell value={pack.tare} mode={units} /> : <span className="text-n-600">—</span>}
+                      <td className="px-[18px] py-[13px] font-mono ">{pack.cga}</td>
+                      <td className="px-[18px] py-[13px] text-right font-mono ">
+                        {pack.tare ? <DualCell value={pack.tare} mode={units} /> : <span className="text-muted">—</span>}
                       </td>
                       <td className="px-[18px] py-[13px]"><AvailabilityTag value={pack.availability} /></td>
                       <td className="px-[18px] py-[13px] text-right" data-print="hide">
@@ -449,37 +450,37 @@ export default async function ProductPage({
                 scroll for the flagship table. */}
             <ul className="flex flex-col gap-3 md:hidden">
               {product.packages.map((pack) => (
-                <li key={pack.sku} className="rounded-[4px] border border-n-100 p-4">
+                <li key={pack.sku} className="rounded-card border border-line p-4">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
-                      <span className="block font-semibold">{pack.size}</span>
-                      <span className="font-mono text-[11.5px] text-n-600">
+                      <span className="block ">{pack.size}</span>
+                      <span className="font-mono text-[11.5px] text-muted">
                         {pack.container} · {pack.spec}
                       </span>
                     </div>
                     <AvailabilityTag value={pack.availability} />
                   </div>
-                  <dl className="mb-3 grid grid-cols-2 gap-y-2 border-t border-n-100 pt-3 text-[13px]">
-                    <dt className="text-n-600">Contents</dt>
-                    <dd className="text-right font-mono font-medium"><DualCell value={pack.contents} mode={units} /></dd>
+                  <dl className="mb-3 grid grid-cols-2 gap-y-2 border-t border-line pt-3 text-[13px]">
+                    <dt className="text-muted">Contents</dt>
+                    <dd className="text-right font-mono "><DualCell value={pack.contents} mode={units} /></dd>
                     {pack.fillPressure.metric !== "—" && (
                       <>
-                        <dt className="text-n-600">Fill pressure</dt>
-                        <dd className="text-right font-mono font-medium"><DualCell value={pack.fillPressure} mode={units} /></dd>
+                        <dt className="text-muted">Fill pressure</dt>
+                        <dd className="text-right font-mono "><DualCell value={pack.fillPressure} mode={units} /></dd>
                       </>
                     )}
-                    <dt className="text-n-600">CGA</dt>
-                    <dd className="text-right font-mono font-medium">{pack.cga}</dd>
+                    <dt className="text-muted">CGA</dt>
+                    <dd className="text-right font-mono ">{pack.cga}</dd>
                     {pack.tare && (
                       <>
-                        <dt className="text-n-600">Tare weight</dt>
-                        <dd className="text-right font-mono font-medium"><DualCell value={pack.tare} mode={units} /></dd>
+                        <dt className="text-muted">Tare weight</dt>
+                        <dd className="text-right font-mono "><DualCell value={pack.tare} mode={units} /></dd>
                       </>
                     )}
                   </dl>
                   <Link
                     href={`/quote?product=${product.slug}&sku=${pack.sku}`}
-                    className="flex h-11 items-center justify-center rounded-[3px] border border-gold-300 text-sm font-medium text-gold-800"
+                    className="flex h-11 items-center justify-center rounded-full border border-line text-sm text-gold-link"
                   >
                     Request a quote for this size
                   </Link>
@@ -492,16 +493,16 @@ export default async function ProductPage({
             ...(has.properties
               ? [{ id: "properties", label: "Properties", print: true, content: (
           <Section id="properties" title="Physical &amp; chemical properties">
-            <dl className="grid gap-x-16 rounded-[4px] border border-n-100 px-5 py-2.5 md:grid-cols-2 md:px-8">
+            <dl className="grid gap-x-16 rounded-card border border-line px-5 py-2.5 md:grid-cols-2 md:px-8">
               {product.properties.map((row, i) => (
                 <div
                   key={row.label}
                   className={`flex items-baseline justify-between gap-5 py-[15px] ${
-                    i < product.properties.length - 2 ? "border-b border-n-100" : "md:border-b-0"
+                    i < product.properties.length - 2 ? "border-b border-line" : "md:border-b-0"
                   }`}
                 >
-                  <dt className="text-[14.5px] text-n-800 md:text-[15px]">{row.label}</dt>
-                  <dd className="text-right font-mono text-[14px] font-medium md:text-[14.5px]">
+                  <dt className="text-[14.5px] text-ink-2 md:text-[15px]">{row.label}</dt>
+                  <dd className="text-right font-mono text-[14px] md:text-[14.5px]">
                     <PropertyValue value={row.value} mode={units} />
                   </dd>
                 </div>
@@ -516,10 +517,10 @@ export default async function ProductPage({
             <div className="mb-7 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
               {product.applications.map((group) => (
                 <div key={group.heading} className="flex flex-col gap-3">
-                  <h3 className="text-[17px] font-semibold md:text-[18px]">{group.heading}</h3>
+                  <h3 className="text-[17px] md:text-[18px]">{group.heading}</h3>
                   <ul className="flex flex-col gap-[9px]">
                     {group.items.map((item) => (
-                      <li key={item} className="border-l-2 border-n-100 pl-4 text-[14.5px] leading-[1.55] text-n-800">
+                      <li key={item} className="border-l-2 border-line pl-4 text-[14.5px] leading-[1.55] text-ink-2">
                         {item}
                       </li>
                     ))}
@@ -541,37 +542,37 @@ export default async function ProductPage({
               ? [{ id: "equipment", label: "Equipment", print: false, content: (
           <Section id="equipment" title="Equipment &amp; compatibility">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <div className="flex flex-col gap-3.5 rounded-[4px] border border-n-100 p-6">
+              <div className="flex flex-col gap-3.5 rounded-card border border-line p-6">
                 <MonoLabel>Connection</MonoLabel>
-                <span className="font-mono text-[26px] font-medium md:text-[30px]">
+                <span className="font-mono text-[26px] md:text-[34px] md:tracking-[-0.024em]">
                   CGA {product.compatibility.cga}
                 </span>
-                <span className="font-mono text-[13.5px] text-n-800">{product.compatibility.cgaThread}</span>
-                <span className="border-t border-n-100 pt-3 text-sm leading-[1.55] text-n-600" style={{ textWrap: "pretty" }}>
+                <span className="font-mono text-[13.5px] text-ink-2">{product.compatibility.cgaThread}</span>
+                <span className="border-t border-line pt-3 text-sm leading-[1.55] text-muted" style={{ textWrap: "pretty" }}>
                   {product.compatibility.cgaNote}
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-[4px] border border-n-100 p-6">
+              <div className="flex flex-col gap-3 rounded-card border border-line p-6">
                 <MonoLabel>Recommended equipment</MonoLabel>
                 <ul className="flex flex-col gap-2">
                   {product.compatibility.recommendedEquipment.map((item) => (
-                    <li key={item} className="text-[14.5px] leading-[1.5] text-n-800">{item}</li>
+                    <li key={item} className="text-[14.5px] leading-[1.5] text-ink-2">{item}</li>
                   ))}
                 </ul>
-                <Link href="/cylinder-guide#regulator-selection" className="mt-auto border-t border-n-100 pt-3 text-sm text-gold-800">
+                <Link href="/cylinder-guide#regulator-selection" className="mt-auto border-t border-line pt-3 text-sm text-gold-link">
                   See regulator selection guide →
                 </Link>
               </div>
 
-              <div className="flex flex-col gap-4 rounded-[4px] border border-n-100 p-6">
+              <div className="flex flex-col gap-4 rounded-card border border-line p-6">
                 <div className="flex flex-col gap-1.5">
                   <MonoLabel>Compatible materials</MonoLabel>
-                  <span className="text-[14.5px] leading-[1.5] text-n-800">{product.compatibility.compatibleMaterials}</span>
+                  <span className="text-[14.5px] leading-[1.5] text-ink-2">{product.compatibility.compatibleMaterials}</span>
                 </div>
-                <div className="flex flex-col gap-1.5 border-t border-n-100 pt-3.5">
+                <div className="flex flex-col gap-1.5 border-t border-line pt-3.5">
                   <MonoLabel>Incompatible</MonoLabel>
-                  <span className="text-[14.5px] leading-[1.5] text-n-800">{product.compatibility.incompatible}</span>
+                  <span className="text-[14.5px] leading-[1.5] text-ink-2">{product.compatibility.incompatible}</span>
                 </div>
               </div>
             </div>
@@ -595,10 +596,10 @@ export default async function ProductPage({
 
             <div className="flex flex-col gap-[22px]">
               <div className="flex flex-col gap-2.5">
-                <h3 className="text-[17px] font-semibold">PPE required</h3>
+                <h3 className="text-[17px] ">PPE required</h3>
                 <ul className="flex flex-wrap gap-2">
                   {product.safety.ppe.map((item) => (
-                    <li key={item} className="inline-flex h-9 items-center rounded-[3px] border border-n-100 bg-n-25 px-3.5 text-[13.5px]">
+                    <li key={item} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-3.5 text-[13.5px]">
                       {item}
                     </li>
                   ))}
@@ -606,10 +607,10 @@ export default async function ProductPage({
               </div>
 
               <div className="flex flex-col gap-2">
-                <h3 className="text-[17px] font-semibold">Never</h3>
+                <h3 className="text-[17px] ">Never</h3>
                 <ul className="flex flex-col gap-2">
                   {product.safety.never.map((item) => (
-                    <li key={item} className="border-l-2 border-gold-300 pl-4 text-[14.5px] leading-[1.55] text-n-800">
+                    <li key={item} className="border-l-2 border-line pl-4 text-[14.5px] leading-[1.55] text-ink-2">
                       {item}
                     </li>
                   ))}
@@ -628,7 +629,7 @@ export default async function ProductPage({
               <table className="w-full min-w-[640px] text-[14.5px]">
                 <caption className="sr-only">{product.name} safety and technical documents</caption>
                 <thead>
-                  <tr className="bg-n-25 text-n-900">
+                  <tr className="bg-surface text-ink">
                     <Th>Document</Th>
                     <Th>Phase</Th>
                     <Th>Language</Th>
@@ -639,14 +640,14 @@ export default async function ProductPage({
                 </thead>
                 <tbody>
                   {product.documents.map((doc, i) => (
-                    <tr key={`${doc.title}-${doc.language}-${doc.phase}`} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                      <td className="px-5 py-3.5 font-semibold">{doc.title}</td>
-                      <td className="px-5 py-3.5 text-n-800">{doc.phase ?? <span className="text-n-600">—</span>}</td>
+                    <tr key={`${doc.title}-${doc.language}-${doc.phase}`} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                      <td className="px-5 py-3.5 ">{doc.title}</td>
+                      <td className="px-5 py-3.5 text-ink-2">{doc.phase ?? <span className="text-muted">—</span>}</td>
                       <td className="px-5 py-3.5 font-mono">{doc.language}</td>
                       <td className="px-5 py-3.5 font-mono">{doc.version}</td>
                       <td className="px-5 py-3.5 font-mono">{doc.revised}</td>
                       <td className="px-5 py-3.5 text-right">
-                        <span className="font-medium text-gold-800">Download PDF</span>
+                        <span className="text-gold-link">Download PDF</span>
                       </td>
                     </tr>
                   ))}
@@ -664,16 +665,16 @@ export default async function ProductPage({
             ...(has.faq
               ? [{ id: "faq", label: "FAQ", print: false, content: (
           <Section id="faq" title="Frequently asked">
-            <div className="border-t border-n-100">
+            <div className="border-t border-line">
               {product.faq.map((entry, i) => (
-                <details key={entry.question} open={i === 0} className="border-b border-n-100 py-5">
+                <details key={entry.question} open={i === 0} className="border-b border-line py-5">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-5">
-                    <span className="text-[16px] font-semibold md:text-[17px]">{entry.question}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c626b" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
+                    <span className="text-[16px] md:text-[17px]">{entry.question}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6B64" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
                       <path d="M6 9l6 6 6-6" />
                     </svg>
                   </summary>
-                  <p className="mt-3 max-w-[760px] text-[15px] leading-[1.65] text-n-800" style={{ textWrap: "pretty" }}>
+                  <p className="mt-3 max-w-[760px] text-[15px] leading-[1.65] text-ink-2" style={{ textWrap: "pretty" }}>
                     {entry.answer}
                   </p>
                 </details>
@@ -699,15 +700,15 @@ export default async function ProductPage({
 
         {/* ------------------------------------------- 16 Quote band ------ */}
         <section className="gutter pb-16 pt-12" data-print="hide">
-          <div className="flex flex-col gap-8 rounded-[4px] border border-n-100 bg-n-25 px-8 py-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-11">
+          <div className="flex flex-col gap-8 rounded-card border border-line bg-surface px-8 py-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-11">
             <div className="flex flex-col gap-3.5">
-              <h2 className="text-2xl font-semibold tracking-[-0.02em] md:text-[30px]">
+              <h2 className="text-2xl tracking-[-0.02em] md:text-[34px] md:tracking-[-0.024em]">
                 Quote {product.name.toLowerCase()} for your site
               </h2>
-              <p className="max-w-[520px] text-[15px] leading-[1.6] text-n-700 md:text-base" style={{ textWrap: "pretty" }}>
+              <p className="max-w-[520px] text-[15px] leading-[1.6] text-muted md:text-base" style={{ textWrap: "pretty" }}>
                 Tell us the grade and size and we&rsquo;ll come back within one business day.
               </p>
-              <dl className="mt-1.5 flex flex-col gap-4 border-t border-n-100 pt-4 sm:flex-row sm:gap-8">
+              <dl className="mt-1.5 flex flex-col gap-4 border-t border-line pt-4 sm:flex-row sm:gap-8">
                 {[
                   { l: "Regions", v: "GTA · Golden Horseshoe" },
                   { l: "Delivery", v: "Scheduled · On-demand · Pickup" },
@@ -715,17 +716,17 @@ export default async function ProductPage({
                 ].map((item) => (
                   <div key={item.l} className="flex flex-col gap-1">
                     <dt><MonoLabel>{item.l}</MonoLabel></dt>
-                    <dd className="text-sm text-n-800">{item.v}</dd>
+                    <dd className="text-sm text-ink-2">{item.v}</dd>
                   </div>
                 ))}
               </dl>
             </div>
             <div className="flex shrink-0 flex-col gap-3">
               <PrimaryButton href={`/quote?product=${product.slug}`} size="lg">Request a Quote</PrimaryButton>
-              <SecondaryButton href={site.orderDesk.phoneHref} size="lg">{site.orderDesk.phone}</SecondaryButton>
+              <QuietLink href={site.orderDesk.phoneHref}>{site.orderDesk.phone}</QuietLink>
             </div>
           </div>
-          <p className="mt-6 text-[12.5px] leading-[1.65] text-n-600" style={{ textWrap: "pretty" }}>
+          <p className="mt-6 text-[12.5px] leading-[1.65] text-muted" style={{ textWrap: "pretty" }}>
             {site.disclaimer}
           </p>
         </section>
@@ -736,17 +737,17 @@ export default async function ProductPage({
       {/* Mobile sticky quote bar — replaces the desktop CTA cluster below 768px. */}
       <div
         data-print="hide"
-        className="sticky bottom-0 z-50 flex items-center gap-2.5 border-t border-n-100 bg-white px-[18px] py-3 md:hidden"
+        className="sticky bottom-0 z-50 flex items-center gap-2.5 border-t border-line bg-white px-[18px] py-3 md:hidden"
       >
         <div className="flex flex-1 flex-col gap-0.5">
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-n-600">
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted">
             Size {primary?.size}
           </span>
-          <span className="text-[13.5px] text-n-700">Quotes individually</span>
+          <span className="text-[13.5px] text-muted">Quotes individually</span>
         </div>
         <Link
           href={`/quote?product=${product.slug}${primary ? `&sku=${primary.sku}` : ""}`}
-          className="inline-flex h-12 items-center rounded-[3px] bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%] px-[22px] text-[15px] font-medium text-n-900"
+          className="inline-flex h-12 items-center rounded-full bg-ink px-[22px] text-[15px] text-ink"
         >
           Request a quote
         </Link>
@@ -778,11 +779,11 @@ function Section({
     >
       {title && (
         <h2
-          className="mb-4 text-2xl font-semibold tracking-[-0.018em] md:text-[28px]"
+          className="mb-4 text-2xl tracking-[-0.018em] md:text-[32px] md:tracking-[-0.022em]"
           dangerouslySetInnerHTML={{ __html: title }}
         />
       )}
-      {sub && <p className="mb-[22px] text-[15.5px] text-n-600">{sub}</p>}
+      {sub && <p className="mb-[22px] text-[15.5px] text-muted">{sub}</p>}
       {children}
     </section>
   );
@@ -800,11 +801,11 @@ function KeyFact({
   mono?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-[7px] border-b border-r border-n-100 px-5 py-5 last:border-r-0 lg:border-b-0">
+    <div className="flex flex-col gap-[7px] border-b border-r border-line px-5 py-5 last:border-r-0 lg:border-b-0">
       <dt><MonoLabel className="text-[10px]">{label}</MonoLabel></dt>
-      <dd className={mono ? "font-mono text-[17px] font-medium md:text-[21px]" : "text-[15px] font-medium leading-[1.3] md:text-base"}>
+      <dd className={mono ? "font-mono text-[17px] md:text-[21px]" : "text-[15px] leading-[1.3] md:text-base"}>
         {value}
-        {unit && <span className="text-sm text-n-600"> {unit}</span>}
+        {unit && <span className="text-sm text-muted"> {unit}</span>}
       </dd>
     </div>
   );
@@ -813,8 +814,8 @@ function KeyFact({
 function SafetyBlock({ title, body }: { title: string; body: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-[17px] font-semibold">{title}</h3>
-      <p className="text-[14.5px] leading-[1.65] text-n-800 md:text-[15px]" style={{ textWrap: "pretty" }}>
+      <h3 className="text-[17px] ">{title}</h3>
+      <p className="text-[14.5px] leading-[1.65] text-ink-2 md:text-[15px]" style={{ textWrap: "pretty" }}>
         {body}
       </p>
     </div>
@@ -831,14 +832,14 @@ function TagRow({
   tone?: "neutral" | "gold";
 }) {
   return (
-    <div className="flex flex-col gap-3 border-t border-n-100 pt-5 md:flex-row md:gap-6">
+    <div className="flex flex-col gap-3 border-t border-line pt-5 md:flex-row md:gap-6">
       <span className="w-[90px] shrink-0 md:pt-2.5"><MonoLabel>{label}</MonoLabel></span>
       <ul className="flex flex-wrap gap-2">
         {items.map((item) => (
           <li
             key={item}
-            className={`inline-flex h-[34px] items-center rounded-[3px] border px-3.5 text-[13.5px] ${
-              tone === "gold" ? "border-gold-300 text-gold-800" : "border-n-100 text-n-800"
+            className={`inline-flex h-[34px] items-center rounded-full border px-3.5 text-[13.5px] ${
+              tone === "gold" ? "border-line text-gold-link" : "border-line text-ink-2"
             }`}
           >
             {item}

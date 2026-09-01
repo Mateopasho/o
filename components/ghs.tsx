@@ -20,8 +20,8 @@ const LABELS: Record<GhsPictogram, string> = {
   corrosive: "Corrosive",
 };
 
-const RED = "#D02020";
-const INK = "#15191d";
+const RED = "#C0392B";
+const INK = "#1A1A18";
 
 export function GhsIcon({
   type,
@@ -51,7 +51,7 @@ export function GhsIcon({
         transform="rotate(45 32 4)"
         fill="#FFFFFF"
         stroke={RED}
-        strokeWidth="4"
+        strokeWidth="3.4"
       />
       {type === "compressed-gas" && (
         <>
@@ -128,16 +128,16 @@ export function TdgChip({ tdgClass, label }: { tdgClass: string; label?: string 
   const toxic = tdgClass.startsWith("2.3");
 
   const tone = flammable
-    ? "bg-gold-200 text-gold-800"
+    ? "bg-gold-ribbon text-gold-link"
     : oxidizer
-      ? "bg-gold-100 text-gold-800"
+      ? "bg-gold-ribbon text-gold-link"
       : toxic
-        ? "bg-n-800 text-white"
-        : "bg-n-100 text-n-900";
+        ? "bg-ink text-white"
+        : "bg-surface-2 text-ink";
 
   return (
     <span
-      className={`inline-flex items-center gap-[6px] rounded-[3px] px-[10px] py-[4px] text-[12.5px] font-medium ${tone}`}
+      className={`inline-flex items-center gap-[6px] rounded-full px-[10px] py-[4px] text-[12.5px] ${tone}`}
     >
       {label ?? tdgClass}
     </span>

@@ -44,7 +44,7 @@ export default function CylinderProgramsPage() {
             <table className="w-full min-w-[760px] text-[14.5px]">
               <caption className="sr-only">Cylinder ownership models compared</caption>
               <thead>
-                <tr className="bg-n-25 text-n-900">
+                <tr className="bg-surface text-ink">
                   <Th className="w-[220px]">Model</Th>
                   <Th>Who owns the cylinder</Th>
                   <Th>Requalification</Th>
@@ -53,11 +53,11 @@ export default function CylinderProgramsPage() {
               </thead>
               <tbody>
                 {cylinderPrograms.map((row, i) => (
-                  <tr key={row.model} data-zebra className={`border-b border-n-100 last:border-0 ${i % 2 === 1 ? "bg-n-25" : ""}`}>
-                    <th scope="row" className="px-5 py-[15px] text-left font-semibold">{row.model}</th>
-                    <td className="px-5 py-[15px] text-n-800">{row.owner}</td>
-                    <td className="px-5 py-[15px] text-n-800">{row.requalification}</td>
-                    <td className="px-5 py-[15px] text-n-800">{row.bestFor}</td>
+                  <tr key={row.model} data-zebra className={`border-b border-line last:border-0 ${i % 2 === 1 ? "bg-surface" : ""}`}>
+                    <th scope="row" className="px-5 py-[15px] text-left ">{row.model}</th>
+                    <td className="px-5 py-[15px] text-ink-2">{row.owner}</td>
+                    <td className="px-5 py-[15px] text-ink-2">{row.requalification}</td>
+                    <td className="px-5 py-[15px] text-ink-2">{row.bestFor}</td>
                   </tr>
                 ))}
               </tbody>
@@ -66,9 +66,9 @@ export default function CylinderProgramsPage() {
 
           <ul className="grid gap-6 md:grid-cols-3">
             {POLICIES.map((policy) => (
-              <li key={policy.title} className="flex flex-col gap-2.5 rounded-[4px] border border-n-100 p-[26px]">
-                <h2 className="text-[19px] font-semibold">{policy.title}</h2>
-                <p className="text-[15px] leading-[1.65] text-n-700" style={{ textWrap: "pretty" }}>
+              <li key={policy.title} className="flex flex-col gap-2.5 rounded-card border border-line p-[26px]">
+                <h2 className="text-[19px] ">{policy.title}</h2>
+                <p className="text-[15px] leading-[1.65] text-muted" style={{ textWrap: "pretty" }}>
                   {policy.body}
                 </p>
               </li>

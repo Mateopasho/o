@@ -48,12 +48,12 @@ export function Numeric({
   muted?: boolean;
 }) {
   return (
-    <span className={muted ? "text-n-600" : undefined}>
+    <span className={muted ? "text-muted" : undefined}>
       {value}
       {unit ? (
         <>
           {" "}
-          <span className="font-normal text-n-400">{unit}</span>
+          <span className="font-normal text-faint">{unit}</span>
         </>
       ) : null}
     </span>
@@ -76,7 +76,7 @@ export function DualCell({ value, mode = "both" }: { value: DualValue; mode?: Un
       <span className="block">
         <Numeric value={value.metric} unit={value.metricUnit} />
       </span>
-      <span className="block text-n-600">
+      <span className="block text-muted">
         <Numeric value={value.imperial} unit={value.imperialUnit} muted />
       </span>
     </>
@@ -94,9 +94,9 @@ export function PropertyValue({
   value: SingleValue | DualValue | string | null;
   mode?: UnitMode;
 }) {
-  if (value === null) return <span className="text-n-600">—</span>;
+  if (value === null) return <span className="text-muted">—</span>;
   if (typeof value === "string") {
-    if (value === "—") return <span className="text-n-600">—</span>;
+    if (value === "—") return <span className="text-muted">—</span>;
     return <span className="font-sans">{value}</span>;
   }
   if (isDual(value)) return <DualCell value={value} mode={mode} />;
@@ -105,5 +105,5 @@ export function PropertyValue({
 
 /** Em dash for an unspecified table cell. */
 export function Dash() {
-  return <span className="text-n-600">—</span>;
+  return <span className="text-muted">—</span>;
 }

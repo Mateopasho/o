@@ -7,11 +7,18 @@ import { usePathname } from "next/navigation";
 import { site, nav } from "@/lib/data/site";
 
 /**
- * Global header.
+ * Global header — premium reformat.
  *
- * Design: a 40px utility strip above a 76px sticky nav bar. The active section
- * carries a 2px gold-400 underline. Below 1120px the nav collapses to a
- * disclosure panel; the search and menu controls are 44px targets throughout.
+ * Two bands:
+ *  1. A gold ribbon carrying opening hours and the CANUTEC number as an ink
+ *     pill. This is where the brand yellow lives now — as a ribbon rather than
+ *     on every button.
+ *  2. An 84px white bar with a hairline underline. The active section is marked
+ *     by a 1px gold underline under the label; everything else is transparent
+ *     until hover, which is why the nav reads so quietly.
+ *
+ * The bar is the sticky element itself, not a child of <header>, because a
+ * sticky element only stays pinned while its own containing block is in view.
  */
 export function SiteHeader({ showUtility = true }: { showUtility?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -20,100 +27,82 @@ export function SiteHeader({ showUtility = true }: { showUtility?: boolean }) {
   const isActive = (href: string) =>
     href === "/gases" ? pathname.startsWith("/gases") : pathname.startsWith(href);
 
-  /*
-   * The utility strip is a sibling of <header>, not a child of it.
-   *
-   * A sticky element can only stay pinned while its own containing block is
-   * still in view. With the strip and the nav bar both inside one <header>,
-   * that container was only 116px tall, so the nav unstuck and vanished the
-   * moment you scrolled past it. Hoisting the strip out leaves <header> as the
-   * sticky element itself, with the page as its containing block — so it stays
-   * pinned for the whole document.
-   */
   return (
     <>
       {showUtility && (
-        <div data-print="hide" className="hidden border-b border-n-100 bg-n-25 lg:block">
-          <div className="gutter flex h-10 items-center justify-between font-mono text-[11.5px] tracking-[0.06em] text-n-600">
-          <div className="flex items-center gap-6">
-            <span>Order desk {site.orderDesk.hours}</span>
-            <span aria-hidden="true">|</span>
-            <span>Depot pickup until {site.depot.pickupUntil}</span>
-          </div>
-          <div className="flex items-center gap-[22px]">
-            <span className="text-gold-800">
-              Emergency · {site.emergency.label} {site.emergency.phone}
-            </span>
-            <span aria-hidden="true">|</span>
-            <span>EN / FR</span>
-          </div>
-          </div>
+        <div
+          data-print="hide"
+          className="hidden items-center justify-center gap-[18px] bg-gold-ribbon px-10 py-[9px] lg:flex"
+        >
+          <span className="font-mono text-[11.5px] tracking-[0.06em] text-gold-ink">
+            Order desk {site.orderDesk.hours} · depot pickup until {site.depot.pickupUntil} ·
+            emergency fills 24h
+          </span>
+          <a
+            href={site.emergency.phoneHref}
+            className="inline-flex h-[26px] items-center rounded-full bg-ink px-[13px] text-xs text-paper hover:text-paper"
+          >
+            {site.emergency.label} {site.emergency.phone}
+          </a>
         </div>
       )}
 
       <header
         data-print="hide"
-        className="sticky top-0 z-60 border-b border-n-100 bg-white"
+        className="sticky top-0 z-60 border-b border-line bg-paper"
       >
-        <div className="gutter flex h-[76px] items-center justify-between">
-          <div className="flex items-center gap-11">
-            <Link href="/" className="flex shrink-0 flex-col gap-1">
-              <Image
-                src="/assets/orion-logo.png"
-                alt="Orion Gases"
-                width={84}
-                height={38}
-                priority
-                className="block h-[34px] w-auto md:h-[38px]"
-              />
-              <span className="hidden font-mono text-[9px] uppercase tracking-[0.18em] text-n-600 lg:block">
-                {site.locality} · Est. {site.established}
-              </span>
-            </Link>
+        <div className="gutter flex h-[68px] items-center justify-between md:h-[84px]">
+          <Link href="/" className="shrink-0">
+            <Image
+              src="/assets/orion-logo.png"
+              alt="Orion Gases"
+              width={96}
+              height={43}
+              priority
+              className="block h-[38px] w-auto md:h-[43px]"
+            />
+          </Link>
 
-            <nav aria-label="Primary" className="hidden gap-[26px] text-[14.5px] xl:flex">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`py-7 text-n-800 hover:text-n-900 ${
-                    isActive(item.href)
-                      ? "border-b-2 border-gold-400 font-medium text-n-900"
-                      : ""
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          <nav aria-label="Primary" className="hidden gap-7 text-[14.5px] text-ink-2 xl:flex">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`border-b pb-[3px] transition-colors duration-150 hover:text-ink ${
+                  isActive(item.href)
+                    ? "border-gold text-ink"
+                    : "border-transparent hover:border-line"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-          <div className="flex items-center gap-2 md:gap-[18px]">
+          <div className="flex items-center gap-3 md:gap-5">
             <Link
               href="/gases"
               aria-label="Search the catalogue"
-              className="inline-flex size-11 items-center justify-center"
+              className="hidden size-9 items-center justify-center rounded-full bg-surface md:inline-flex"
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5c626b" strokeWidth="2" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6B64" strokeWidth="1.8" aria-hidden="true">
                 <circle cx="11" cy="11" r="7" />
                 <path d="M16 16l5 5" />
               </svg>
             </Link>
 
-            <a href={site.orderDesk.phoneHref} className="hidden flex-col items-end gap-px lg:flex">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-n-600">
-                Order desk
-              </span>
-              <span className="font-mono text-[15px] font-medium text-n-900">
-                {site.orderDesk.phone}
-              </span>
+            <a
+              href={site.orderDesk.phoneHref}
+              className="hidden font-mono text-sm text-ink-2 hover:text-ink lg:block"
+            >
+              {site.orderDesk.phone}
             </a>
 
             <Link
               href="/quote"
-              className="hidden h-11 items-center rounded-[3px] bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%] px-5 text-[14.5px] font-medium text-n-900 transition-colors duration-150 hover:bg-gold-300 sm:inline-flex"
+              className="hidden h-[38px] items-center rounded-full bg-ink px-[18px] text-sm text-paper transition-opacity duration-150 hover:text-paper hover:opacity-[0.82] sm:inline-flex"
             >
-              Request a Quote
+              Request a quote
             </Link>
 
             <button
@@ -124,7 +113,7 @@ export function SiteHeader({ showUtility = true }: { showUtility?: boolean }) {
               aria-label={open ? "Close menu" : "Open menu"}
               className="inline-flex size-11 items-center justify-center xl:hidden"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2a2e34" strokeWidth="2" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A18" strokeWidth="1.8" aria-hidden="true">
                 {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 12h16M4 6h16M4 18h16" />}
               </svg>
             </button>
@@ -132,19 +121,15 @@ export function SiteHeader({ showUtility = true }: { showUtility?: boolean }) {
         </div>
 
         {open && (
-          <nav
-            id="mobile-nav"
-            aria-label="Primary"
-            className="border-t border-n-100 bg-white px-[18px] pb-4 xl:hidden"
-          >
+          <nav id="mobile-nav" aria-label="Primary" className="gutter border-t border-line pb-5 xl:hidden">
             <ul className="flex flex-col">
               {nav.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`flex min-h-[52px] items-center border-b border-n-100 text-[15.5px] ${
-                      isActive(item.href) ? "font-medium text-gold-800" : "text-n-800"
+                    className={`flex min-h-[52px] items-center border-b border-line text-[15.5px] ${
+                      isActive(item.href) ? "text-ink" : "text-muted"
                     }`}
                   >
                     {item.label}
@@ -152,17 +137,17 @@ export function SiteHeader({ showUtility = true }: { showUtility?: boolean }) {
                 </li>
               ))}
             </ul>
-            <div className="mt-4 flex flex-col gap-2 sm:hidden">
+            <div className="mt-5 flex flex-col gap-2.5 sm:hidden">
               <Link
                 href="/quote"
                 onClick={() => setOpen(false)}
-                className="flex h-12 items-center justify-center rounded-[3px] bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%] text-[15.5px] font-medium text-n-900"
+                className="flex h-12 items-center justify-center rounded-full bg-ink text-[15px] text-paper hover:text-paper"
               >
-                Request a Quote
+                Request a quote
               </Link>
               <a
                 href={site.orderDesk.phoneHref}
-                className="flex h-12 items-center justify-center rounded-[3px] border border-n-200 text-[15.5px] font-medium text-n-800"
+                className="flex h-12 items-center justify-center rounded-full border border-line text-[15px] text-ink"
               >
                 {site.orderDesk.phone}
               </a>

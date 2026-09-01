@@ -52,9 +52,9 @@ export function StickyJumpNav({
   return (
     <nav
       aria-label={label}
-      className="scroll-x flex gap-5 border-b border-n-100 py-4 lg:sticky lg:top-[100px] lg:max-h-[calc(100vh-140px)] lg:flex-col lg:gap-3.5 lg:overflow-y-auto lg:self-start lg:border-b-0 lg:border-r lg:py-8 lg:pr-6"
+      className="scroll-x flex gap-5 border-b border-line py-4 lg:sticky lg:top-[100px] lg:max-h-[calc(100vh-140px)] lg:flex-col lg:gap-3.5 lg:overflow-y-auto lg:self-start lg:border-b-0 lg:border-r lg:py-8 lg:pr-6"
     >
-      <span className="hidden font-mono text-[10.5px] uppercase tracking-[0.14em] text-n-600 lg:mb-1 lg:block">
+      <span className="hidden font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted lg:mb-1 lg:block">
         {label}
       </span>
       {items.map((item) => (
@@ -64,8 +64,8 @@ export function StickyJumpNav({
           aria-current={active === item.id ? "true" : undefined}
           className={`shrink-0 text-[14.5px] transition-colors duration-150 ${
             active === item.id
-              ? "font-medium text-gold-800"
-              : "text-n-800 hover:text-gold-800"
+              ? "text-gold-link"
+              : "text-ink-2 hover:text-gold-link"
           }`}
         >
           {item.label}

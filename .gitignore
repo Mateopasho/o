@@ -33,3 +33,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Admin portal edits (local file store)
+.data/

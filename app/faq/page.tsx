@@ -63,7 +63,7 @@ const GROUPS = [
     entries: [
       {
         q: "Which areas do you deliver to?",
-        a: `${site.citiesServed.join(", ")} on fixed route days, with same-day emergency service inside the inner GTA zone and a 24-hour window across the wider service area.`,
+        a: `Same-day delivery anywhere in Toronto. Beyond the city — ${site.citiesServed.filter((c) => c !== "Toronto").join(", ")} and the wider Golden Horseshoe — tell us the postal code and the order desk will confirm a delivery day when you ask.`,
       },
       {
         q: "How late can I change a standing order?",
@@ -140,7 +140,7 @@ export default function FaqPage() {
 
       <main id="main" className="bg-white">
         <div className="gutter py-11 md:py-14">
-          <h1 className="mb-8 text-[32px] font-semibold tracking-[-0.025em] md:text-[46px]" style={{ textWrap: "pretty" }}>
+          <h1 className="mb-8 text-[32px] tracking-[-0.025em] md:text-[60px] md:tracking-[-0.032em]" style={{ textWrap: "pretty" }}>
             Frequently asked questions
           </h1>
 
@@ -153,23 +153,23 @@ export default function FaqPage() {
             <div>
               {GROUPS.map((group, gi) => (
                 <section key={group.id} id={group.id} className={`scroll-mt-[130px] ${gi > 0 ? "mt-10" : ""}`}>
-                  <h2 className="mb-2 text-[21px] font-semibold tracking-[-0.015em] md:text-2xl">
+                  <h2 className="mb-2 text-[21px] tracking-[-0.015em] md:text-2xl">
                     {group.title}
                   </h2>
-                  <div className="border-t border-n-100">
+                  <div className="border-t border-line">
                     {group.entries.map((entry, i) => (
                       <details
                         key={entry.q}
                         open={gi === 0 && i === 0}
-                        className="border-b border-n-100 py-[22px]"
+                        className="border-b border-line py-[22px]"
                       >
                         <summary className="flex cursor-pointer list-none items-center justify-between gap-5">
-                          <span className="text-[16.5px] font-semibold md:text-[17.5px]">{entry.q}</span>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c626b" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
+                          <span className="text-[16.5px] md:text-[17.5px]">{entry.q}</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6B64" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
                             <path d="M6 9l6 6 6-6" />
                           </svg>
                         </summary>
-                        <p className="mt-3 max-w-[760px] text-[15px] leading-[1.7] text-n-800 md:text-[15.5px]" style={{ textWrap: "pretty" }}>
+                        <p className="mt-3 max-w-[760px] text-[15px] leading-[1.7] text-ink-2 md:text-[15.5px]" style={{ textWrap: "pretty" }}>
                           {entry.a}
                         </p>
                       </details>
@@ -178,15 +178,15 @@ export default function FaqPage() {
                 </section>
               ))}
 
-              <div className="mt-10 flex flex-col items-start gap-3 rounded-[4px] border border-n-100 bg-n-25 px-8 py-8">
-                <h2 className="text-[19px] font-semibold">Still not answered?</h2>
-                <p className="max-w-[52ch] text-[15px] leading-[1.65] text-n-700">
+              <div className="mt-10 flex flex-col items-start gap-3 rounded-card border border-line bg-surface px-8 py-8">
+                <h2 className="text-[19px] ">Still not answered?</h2>
+                <p className="max-w-[52ch] text-[15px] leading-[1.65] text-muted">
                   The order desk answers technical questions without a quote attached. Ask, and
                   someone who fills cylinders will reply.
                 </p>
                 <div className="mt-1 flex flex-wrap gap-4">
-                  <Link href="/quote" className="text-[15px] font-medium text-gold-800">Send a question →</Link>
-                  <a href={site.orderDesk.phoneHref} className="text-[15px] font-medium text-gold-800">
+                  <Link href="/quote" className="text-[15px] text-gold-link">Send a question →</Link>
+                  <a href={site.orderDesk.phoneHref} className="text-[15px] text-gold-link">
                     {site.orderDesk.phone}
                   </a>
                 </div>

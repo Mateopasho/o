@@ -30,14 +30,14 @@ export function PageHero({
       <div className="gutter relative pb-9 pt-11 md:pb-12 md:pt-14">
         <Breadcrumb trail={breadcrumb} />
         <h1
-          className="mb-4 mt-[18px] max-w-[720px] text-[32px] font-semibold tracking-[-0.025em] md:text-[46px]"
+          className="mb-4 mt-[18px] max-w-[720px] text-[32px] tracking-[-0.025em] md:text-[60px] md:tracking-[-0.032em]"
           style={{ textWrap: "pretty" }}
         >
           {title}
         </h1>
         {lede && (
           <p
-            className="max-w-[620px] text-[16px] leading-[1.6] text-n-700 md:text-[18px]"
+            className="max-w-[620px] text-[16px] leading-[1.6] text-muted md:text-[18px]"
             style={{ textWrap: "pretty" }}
           >
             {lede}
@@ -60,8 +60,8 @@ export function JumpNav({
   activeId?: string;
 }) {
   return (
-    <nav aria-label={label} className="scroll-x flex gap-5 border-b border-n-100 pb-3 lg:flex-col lg:gap-3.5 lg:border-b-0 lg:pb-0">
-      <span className="hidden font-mono text-[10.5px] uppercase tracking-[0.14em] text-n-600 lg:mb-1 lg:block">
+    <nav aria-label={label} className="scroll-x flex gap-5 border-b border-line pb-3 lg:flex-col lg:gap-3.5 lg:border-b-0 lg:pb-0">
+      <span className="hidden font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted lg:mb-1 lg:block">
         {label}
       </span>
       {items.map((item, i) => (
@@ -70,8 +70,8 @@ export function JumpNav({
           href={`#${item.id}`}
           className={`shrink-0 text-[14.5px] ${
             (activeId ?? items[0].id) === item.id || (!activeId && i === 0)
-              ? "font-medium text-gold-800"
-              : "text-n-800 hover:text-gold-800"
+              ? "text-gold-link"
+              : "text-ink-2 hover:text-gold-link"
           }`}
         >
           {item.label}

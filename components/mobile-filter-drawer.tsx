@@ -73,14 +73,14 @@ export function MobileFilterDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-11 items-center gap-[7px] rounded-[3px] border border-n-200 px-[13px] text-[13.5px] font-medium text-n-800"
+        className="inline-flex h-11 items-center gap-[7px] rounded-full border border-line px-[13px] text-[13.5px] text-ink-2"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M4 6h16M7 12h10M10 18h4" />
         </svg>
         Filters
         {appliedCount > 0 && (
-          <span className="rounded-[2px] bg-gold-100 px-1.5 py-0.5 font-mono text-[11px] text-gold-800">
+          <span className="rounded-full bg-gold-ribbon px-1.5 py-0.5 font-mono text-[11px] text-gold-link">
             {appliedCount}
           </span>
         )}
@@ -93,7 +93,7 @@ export function MobileFilterDrawer({
             type="button"
             aria-label="Close filters"
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-90 bg-n-950/40"
+            className="fixed inset-0 z-90 bg-ink/40"
           />
 
           <div
@@ -102,15 +102,15 @@ export function MobileFilterDrawer({
             aria-label="Filter products"
             className="fixed inset-x-0 bottom-0 z-100 flex max-h-[88vh] flex-col rounded-t-[14px] bg-white"
           >
-            <div className="flex items-center justify-between border-b border-n-100 px-[18px] py-4">
-              <h2 className="text-[17px] font-semibold">Filters</h2>
+            <div className="flex items-center justify-between border-b border-line px-[18px] py-4">
+              <h2 className="text-[17px] ">Filters</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close filters"
                 className="inline-flex size-11 items-center justify-center"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2a2e34" strokeWidth="2" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A18" strokeWidth="2" aria-hidden="true">
                   <path d="M6 6l12 12M18 6L6 18" />
                 </svg>
               </button>
@@ -119,8 +119,8 @@ export function MobileFilterDrawer({
             {/* Staged selection */}
             <div className="flex-1 overflow-y-auto px-[18px] py-2">
               {groups.map((group) => (
-                <fieldset key={group.key} className="border-b border-n-100 py-4 last:border-b-0">
-                  <legend className="mb-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-n-600">
+                <fieldset key={group.key} className="border-b border-line py-4 last:border-b-0">
+                  <legend className="mb-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted">
                     {group.label}
                   </legend>
                   <div className="flex flex-col">
@@ -142,10 +142,10 @@ export function MobileFilterDrawer({
                             />
                             <span
                               aria-hidden="true"
-                              className={`inline-flex size-[19px] shrink-0 items-center justify-center rounded-[2px] border ${
+                              className={`inline-flex size-[19px] shrink-0 items-center justify-center rounded-[5px] border ${
                                 checked
-                                  ? "border-gold-600 bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%]"
-                                  : "border-n-200"
+                                  ? "border-ink bg-ink"
+                                  : "border-line"
                               }`}
                             >
                               {checked && (
@@ -157,7 +157,7 @@ export function MobileFilterDrawer({
                             {option.label}
                           </span>
                           {option.count !== undefined && (
-                            <span className="font-mono text-xs text-n-600">{option.count}</span>
+                            <span className="font-mono text-xs text-muted">{option.count}</span>
                           )}
                         </label>
                       );
@@ -173,12 +173,12 @@ export function MobileFilterDrawer({
               live. It disables at zero so you cannot apply a combination that
               lands on an empty page.
             */}
-            <div className="flex items-center gap-2.5 border-t border-n-100 px-[18px] py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex items-center gap-2.5 border-t border-line px-[18px] py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <button
                 type="button"
                 onClick={() => setStaged({ ...staged, ...{ category: [], grade: [], container: [], tdg: [], process: [] } })}
                 disabled={stagedCount === 0}
-                className="inline-flex h-12 items-center rounded-[3px] border border-n-200 px-4 text-[14.5px] font-medium text-n-800 disabled:opacity-40"
+                className="inline-flex h-12 items-center rounded-full border border-line px-4 text-[14.5px] text-ink-2 disabled:opacity-40"
               >
                 Clear all
               </button>
@@ -186,7 +186,7 @@ export function MobileFilterDrawer({
                 type="button"
                 onClick={apply}
                 disabled={resultCount === 0}
-                className="inline-flex h-12 flex-1 items-center justify-center rounded-[3px] bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%] text-[15px] font-medium text-n-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-ink text-[15px] text-ink disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {resultCount === 0
                   ? "No products match"

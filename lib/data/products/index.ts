@@ -10,12 +10,19 @@ import {
 } from "./specialty";
 
 /**
- * The published catalogue.
+ * The verified catalogue baseline.
  *
- * Only ACTIVE products are exposed publicly. Design system section 08:
- * "Draft state — public requests 404."
+ * These records are the source of truth for everything safety-critical — CGA
+ * outlet numbers and thread specifications, TC/DOT markings, UN numbers, TDG
+ * classes, GHS pictograms — checked against CGA V-1 and the cylinder standards
+ * and kept in git so a change is a reviewable diff.
+ *
+ * The admin portal never rewrites this file. It stores an overlay that merges
+ * over these records at read time; see `lib/store/snapshot.ts`. Read the merged
+ * catalogue through `lib/catalogue.ts`, not from here — this module is the
+ * baseline, not the published state.
  */
-export const allProducts: Product[] = [
+export const staticProducts: Product[] = [
   argon, oxygen, nitrogen, hydrogen, compressedAir,
   arCo2_7525, arCo2_928, arO2_982,
   acetylene, propane, propylene,
@@ -24,14 +31,28 @@ export const allProducts: Product[] = [
   foodGradeNitrogen, dryIce,
 ];
 
-export const products = allProducts.filter((p) => p.status === "ACTIVE");
+/* -------------------------------------------------------------------------- */
+/* Derivations                                                                 */
+/*                                                                             */
+/* Each takes the product list explicitly so the same logic serves the static   */
+/* baseline and the merged, portal-edited catalogue. Nothing below reads a      */
+/* module-level array.                                                         */
+/* -------------------------------------------------------------------------- */
 
-export function productBySlug(slug: string): Product | undefined {
-  return products.find((p) => p.slug === slug);
+/**
+ * Only ACTIVE products are exposed publicly. Design system section 08:
+ * "Draft state — public requests 404."
+ */
+export function publishedFrom(all: readonly Product[]): Product[] {
+  return all.filter((p) => p.status === "ACTIVE");
 }
 
-export function productsByCategory(categorySlug: string): Product[] {
-  return products.filter((p) => p.categorySlug === categorySlug);
+export function bySlugFrom(list: readonly Product[], slug: string): Product | undefined {
+  return list.find((p) => p.slug === slug);
+}
+
+export function byCategoryFrom(list: readonly Product[], categorySlug: string): Product[] {
+  return list.filter((p) => p.categorySlug === categorySlug);
 }
 
 /**
@@ -39,35 +60,37 @@ export function productsByCategory(categorySlug: string): Product[] {
  * three of nine categories that present as filter views over the primary six —
  * see lib/data/categories.ts for why.
  */
-export function productsForCategoryView(categorySlug: string): Product[] {
+export function forCategoryViewFrom(list: readonly Product[], categorySlug: string): Product[] {
   switch (categorySlug) {
     case "propane":
-      return products.filter((p) => ["propane", "propylene"].includes(p.slug));
+      return list.filter((p) => ["propane", "propylene"].includes(p.slug));
     case "dry-ice":
-      return products.filter((p) => ["dry-ice", "carbon-dioxide"].includes(p.slug));
+      return list.filter((p) => ["dry-ice", "carbon-dioxide"].includes(p.slug));
     case "laser-gases":
-      return products.filter((p) =>
+      return list.filter((p) =>
         ["nitrogen", "oxygen", "carbon-dioxide", "helium"].includes(p.slug),
       );
     default:
-      return productsByCategory(categorySlug);
+      return byCategoryFrom(list, categorySlug);
   }
 }
 
 /** Home-page carousel, ordered by the design's featured ranking. */
-export const featuredProducts = products
-  .filter((p) => p.featuredRank !== null)
-  .sort((a, b) => (a.featuredRank ?? 99) - (b.featuredRank ?? 99));
+export function featuredFrom(list: readonly Product[]): Product[] {
+  return list
+    .filter((p) => p.featuredRank !== null)
+    .sort((a, b) => (a.featuredRank ?? 99) - (b.featuredRank ?? 99));
+}
 
-export function relatedProducts(product: Product): Product[] {
+export function relatedFrom(list: readonly Product[], product: Product): Product[] {
   return product.relatedSlugs
-    .map((slug) => productBySlug(slug))
+    .map((slug) => bySlugFrom(list, slug))
     .filter((p): p is Product => Boolean(p));
 }
 
 /** Flattened SDS library for the safety page. */
-export function sdsLibrary() {
-  return products
+export function sdsLibraryFrom(list: readonly Product[]) {
+  return list
     .flatMap((p) =>
       p.documents
         .filter((d) => d.title.includes("Safety Data Sheet") || d.title.includes("sécurité"))
@@ -86,8 +109,8 @@ export function sdsLibrary() {
 }
 
 /** Every distinct SKU row, used to pre-fill the quote form from a URL. */
-export function findSku(sku: string) {
-  for (const product of products) {
+export function findSkuIn(list: readonly Product[], sku: string) {
+  for (const product of list) {
     const pack = product.packages.find((c) => c.sku === sku);
     if (pack) return { product, pack };
   }

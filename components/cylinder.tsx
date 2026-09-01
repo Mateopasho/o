@@ -7,10 +7,10 @@ import type { CylinderShape } from "@/lib/types";
  * 2px, valve accent in cyan, cap colour driven by category. Scales without asset
  * management and prints cleanly."
  *
- * Note on the valve accent: the design system text says "cyan" but every screen
- * in the design document draws the valve cap in gold-800 #816412. The screens
- * are authoritative for a 1:1 build, so gold-800 is used — a cyan accent would
- * also have introduced a colour outside the documented palette.
+ * Valve accent: the premium artboards draw the valve cap in gold-link #7E6413
+ * against a #3B3A36 body and #D8D4CB bands. The original design system text
+ * called for cyan, but no artboard has ever drawn it that way and cyan sits
+ * outside the documented palette, so the artboards win.
  *
  * Paths below are transcribed verbatim from the design document so proportions
  * match at every size.
@@ -30,9 +30,9 @@ interface CylinderProps {
   className?: string;
 }
 
-const GOLD = "#816412";
-const INK = "#2a2e34";
-const BAND = "#d7dbe0";
+const GOLD = "#7E6413";
+const INK = "#3B3A36";
+const BAND = "#D8D4CB";
 
 export function Cylinder({
   shape,

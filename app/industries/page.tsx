@@ -6,7 +6,7 @@ import { PageHero } from "@/components/page-hero";
 import { StickyJumpNav } from "@/components/sticky-jump-nav";
 import { Formula } from "@/lib/format";
 import { industriesIndex } from "@/lib/data/site";
-import { productBySlug } from "@/lib/data/products";
+import { getProducts } from "@/lib/catalogue";
 
 export const metadata: Metadata = {
   title: "Industries served",
@@ -133,7 +133,9 @@ const SECTORS: {
   },
 ];
 
-export default function IndustriesPage() {
+export default async function IndustriesPage() {
+  /* One read for the whole page; each sector match is a map lookup. */
+  const bySlug = new Map((await getProducts()).map((p) => [p.slug, p]));
   return (
     <>
       <SiteHeader />
@@ -160,20 +162,20 @@ export default function IndustriesPage() {
                 key={sector.slug}
                 id={sector.slug}
                 className={`scroll-mt-[130px] ${
-                  i < SECTORS.length - 1 ? "mb-9 border-b border-n-100 pb-9" : ""
+                  i < SECTORS.length - 1 ? "mb-9 border-b border-line pb-9" : ""
                 }`}
               >
                 <div className="mb-3.5 flex items-baseline gap-4">
-                  <span className="font-mono text-xs text-gold-800">
+                  <span className="font-mono text-xs text-gold-link">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <h2 className="text-2xl font-semibold tracking-[-0.018em] md:text-[30px]">
+                  <h2 className="text-2xl tracking-[-0.018em] md:text-[34px] md:tracking-[-0.024em]">
                     {sector.name}
                   </h2>
                 </div>
 
                 <p
-                  className="mb-6 max-w-[720px] text-[15.5px] leading-[1.7] text-n-800 md:text-[16.5px]"
+                  className="mb-6 max-w-[720px] text-[15.5px] leading-[1.7] text-ink-2 md:text-[16.5px]"
                   style={{ textWrap: "pretty" }}
                 >
                   {sector.body}
@@ -181,13 +183,13 @@ export default function IndustriesPage() {
 
                 <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {sector.matches.map((match) => {
-                    const product = match.productSlug ? productBySlug(match.productSlug) : undefined;
+                    const product = match.productSlug ? bySlug.get(match.productSlug) : undefined;
                     const inner = (
                       <>
-                        <span className="text-[15.5px] font-semibold">
+                        <span className="text-[15.5px] ">
                           <Formula value={match.label} />
                         </span>
-                        <span className="font-mono text-[11.5px] text-n-600">{match.note}</span>
+                        <span className="font-mono text-[11.5px] text-muted">{match.note}</span>
                       </>
                     );
                     return (
@@ -195,12 +197,12 @@ export default function IndustriesPage() {
                         {product ? (
                           <Link
                             href={`/gases/${product.categorySlug}/${product.slug}`}
-                            className="flex h-full flex-col gap-[7px] rounded-[4px] border border-n-100 p-[18px] text-n-900 transition-colors duration-150 hover:border-gold-600 hover:text-n-900"
+                            className="flex h-full flex-col gap-[7px] rounded-card border border-line p-[18px] text-ink transition-colors duration-150 hover:border-ink hover:text-ink"
                           >
                             {inner}
                           </Link>
                         ) : (
-                          <div className="flex h-full flex-col gap-[7px] rounded-[4px] border border-n-100 p-[18px]">
+                          <div className="flex h-full flex-col gap-[7px] rounded-card border border-line p-[18px]">
                             {inner}
                           </div>
                         )}

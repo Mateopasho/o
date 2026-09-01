@@ -64,18 +64,18 @@ export function ProductCarousel({ products }: { products: Product[] }) {
       <div className="gutter mb-4 flex items-end justify-between md:mb-8">
         <div>
           <div className="mb-4 flex items-center gap-[14px]">
-            <span className="h-px w-8 bg-gold-400" />
-            <span className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-n-600">
+            <span className="h-px w-8 bg-gold" />
+            <span className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-muted">
               Top products
             </span>
           </div>
-          <h2 className="text-[22px] font-semibold tracking-[-0.022em] md:text-[40px]">
+          <h2 className="text-[26px] leading-[1.1] tracking-[-0.024em] md:text-[48px] md:leading-[1.08] md:tracking-[-0.028em]">
             <span className="md:hidden">What leaves daily</span>
             <span className="hidden md:inline">What leaves the depot every day</span>
           </h2>
         </div>
 
-        <span className="font-mono text-[11px] text-n-400 md:hidden">swipe →</span>
+        <span className="font-mono text-[11px] text-faint md:hidden">swipe →</span>
 
         <div className="hidden items-center gap-2.5 md:flex">
           <ArrowButton direction="prev" onClick={() => step(-1)} disabled={atStart} />
@@ -120,9 +120,9 @@ function ArrowButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={direction === "prev" ? "Previous products" : "Next products"}
-      className="inline-flex size-11 items-center justify-center rounded-[3px] border border-n-200 transition-colors duration-150 hover:border-gold-800 disabled:cursor-not-allowed disabled:border-n-100 disabled:opacity-40 disabled:hover:border-n-100"
+      className="inline-flex size-11 items-center justify-center rounded-full border border-line transition-colors duration-150 hover:border-ink disabled:cursor-not-allowed disabled:border-line disabled:opacity-40 disabled:hover:border-line"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2a2e34" strokeWidth="2" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A18" strokeWidth="2" aria-hidden="true">
         <path d={direction === "prev" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
       </svg>
     </button>

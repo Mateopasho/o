@@ -37,7 +37,7 @@ export const site = {
   stats: {
     publishedProducts: 53,
     categories: 9,
-    emergencyWindow: "24h",
+    emergencyWindow: "Same day",
     yearsInOperation: 48,
     deliveryVehicles: 14,
     fillPlants: 1,
@@ -169,8 +169,8 @@ export const deliveryModes = [
   },
   {
     ordinal: "02",
-    title: "On-demand & emergency",
-    body: "Same-day service inside the inner zone when a line goes down. 24-hour window across the wider service area.",
+    title: "Same-day in Toronto",
+    body: "Same-day delivery anywhere in Toronto. Outside the city we quote a window when you ask — tell us where you are and we will confirm the day.",
   },
   {
     ordinal: "03",

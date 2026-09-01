@@ -2,32 +2,23 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Availability } from "@/lib/types";
 
-/* -------------------------------------------------------------------------- */
-/* Section label — gold rule + mono caps. Used above every section heading.    */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   Premium primitives.
 
-export function SectionLabel({
-  children,
-  tone = "neutral",
-}: {
-  children: ReactNode;
-  tone?: "neutral" | "gold";
-}) {
-  return (
-    <div className="mb-4 flex items-center gap-[14px]">
-      <span className="h-px w-8 bg-gold-400" />
-      <span
-        className={`font-mono text-[11.5px] uppercase tracking-[0.16em] ${
-          tone === "gold" ? "text-gold-800" : "text-n-600"
-        }`}
-      >
-        {children}
-      </span>
-    </div>
-  );
-}
+   The shape language changed wholesale from the first build:
+     · Controls are pills (9999px), not 3px rectangles.
+     · The primary action is ink-black, not a gold gradient. Gold is demoted to
+       ribbon / rule / chip, which is what keeps it meaningful next to the
+       regulated red of a GHS diamond.
+     · Secondary actions are underlined text, not outlined boxes — far quieter
+       beside a black pill.
+     · Cards are 20px, tinted #F6F5F1, and separated by hairlines rather than
+       shadow.
+   ========================================================================== */
 
-/** Mono uppercase micro-label used on tiles and table headers. */
+/* --------------------------------------------------------------- labels -- */
+
+/** Mono uppercase micro-label. The workhorse label of the premium system. */
 export function MonoLabel({
   children,
   className = "",
@@ -37,24 +28,41 @@ export function MonoLabel({
 }) {
   return (
     <span
-      className={`font-mono text-[10.5px] uppercase tracking-[0.14em] text-n-600 ${className}`}
+      className={`font-mono text-[10.5px] uppercase tracking-[0.18em] text-faint ${className}`}
     >
       {children}
     </span>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Buttons                                                                     */
-/*                                                                             */
-/* Design system 05: 44px height, 3px radius, 150ms ease-out on background     */
-/* only. No transform, no bounce. Gold 400 is the primary button fill; gold    */
-/* 800 carries text-link affordances.                                          */
-/* -------------------------------------------------------------------------- */
+/**
+ * Centred section divider: hairline — label — hairline.
+ * Replaces the old left-aligned gold tick.
+ */
+export function SectionRule({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-10 flex items-center gap-6 md:mb-12">
+      <span className="h-px flex-1 bg-line" />
+      <span className="font-mono text-[11.5px] uppercase tracking-[0.18em] text-muted">
+        {children}
+      </span>
+      <span className="h-px flex-1 bg-line" />
+    </div>
+  );
+}
 
-const BTN_BASE =
-  "inline-flex items-center justify-center gap-[10px] rounded-[3px] font-medium transition-colors duration-150 ease-out";
+/** Left-aligned eyebrow for interior page sections. */
+export function Eyebrow({ children }: { children: ReactNode }) {
+  return (
+    <span className="block font-mono text-[10.5px] uppercase tracking-[0.18em] text-faint">
+      {children}
+    </span>
+  );
+}
 
+/* -------------------------------------------------------------- buttons -- */
+
+/** Ink pill. The only "loud" control in the system. */
 export function PrimaryButton({
   href,
   children,
@@ -68,105 +76,130 @@ export function PrimaryButton({
 }) {
   const dims =
     size === "lg"
-      ? "h-[52px] px-7 text-base"
+      ? "h-[46px] px-[26px] text-[15px]"
       : size === "sm"
-        ? "h-9 px-[14px] text-[13px]"
-        : "h-11 px-5 text-[14.5px]";
+        ? "h-[34px] px-4 text-[13px]"
+        : "h-[38px] px-[18px] text-sm";
   return (
     <Link
       href={href}
-      className={`${BTN_BASE} ${dims} bg-linear-[180deg,var(--color-gold-300)_0%,var(--color-gold-400)_100%] text-n-900 hover:bg-gold-300 hover:text-n-900 ${className}`}
+      className={`inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-ink text-paper transition-opacity duration-150 ease-out hover:text-paper hover:opacity-[0.82] ${dims} ${className}`}
     >
       {children}
     </Link>
   );
 }
 
-export function SecondaryButton({
+/** Underlined text link. The premium secondary action — no box. */
+export function QuietLink({
   href,
   children,
-  size = "md",
   className = "",
 }: {
   href: string;
   children: ReactNode;
-  size?: "sm" | "md" | "lg";
   className?: string;
 }) {
-  const dims =
-    size === "lg"
-      ? "h-[52px] px-[26px] text-base"
-      : size === "sm"
-        ? "h-9 px-[14px] text-[13px]"
-        : "h-11 px-5 text-[14.5px]";
   return (
     <Link
       href={href}
-      className={`${BTN_BASE} ${dims} border border-n-200 text-n-800 transition-colors hover:border-gold-600 hover:text-n-800 ${className}`}
+      className={`inline-flex items-center gap-2 whitespace-nowrap border-b border-faint-2 pb-0.5 text-[15px] text-ink transition-colors duration-150 ease-out hover:border-ink hover:text-ink ${className}`}
     >
       {children}
     </Link>
   );
 }
 
-/** Outlined gold quote button used on every package table row. */
+/** Outlined pill — used for filters, sort, pagination "Next". */
+export function OutlineButton({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex h-[38px] items-center gap-2.5 whitespace-nowrap rounded-full border border-line px-4 text-sm text-ink transition-colors duration-150 hover:border-faint-2 hover:text-ink ${className}`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/** Per-row quote action inside a package table. */
 export function QuoteButton({ href, className = "" }: { href: string; className?: string }) {
   return (
     <Link
       href={href}
-      className={`inline-flex h-10 items-center whitespace-nowrap rounded-[3px] border border-gold-300 px-[14px] text-[13px] font-medium text-gold-800 transition-colors duration-150 hover:bg-gold-100 ${className}`}
+      className={`inline-flex h-[34px] items-center whitespace-nowrap rounded-full border border-line px-4 text-[13px] text-ink transition-colors duration-150 hover:border-ink hover:text-ink ${className}`}
     >
       Quote
     </Link>
   );
 }
 
-/** Underlined text link with a gold rule, used for section-level navigation. */
-export function RuleLink({
-  href,
+/* ---------------------------------------------------------------- chips -- */
+
+type ChipTone = "gold" | "neutral";
+
+/** Pill chip. Gold marks the primary classification; neutral the rest. */
+export function Chip({
   children,
+  tone = "neutral",
   className = "",
 }: {
-  href: string;
   children: ReactNode;
+  tone?: ChipTone;
   className?: string;
 }) {
+  const palette =
+    tone === "gold"
+      ? "bg-gold-ribbon text-gold-ink"
+      : "bg-surface text-muted";
   return (
-    <Link
-      href={href}
-      className={`inline-flex items-center gap-[10px] border-b border-gold-300 pb-1 text-[15px] font-medium text-gold-800 ${className}`}
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] ${palette} ${className}`}
     >
       {children}
-    </Link>
+    </span>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Availability dot                                                            */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------- availability -- */
 
 export function AvailabilityTag({ value }: { value: Availability }) {
-  const map: Record<Availability, { dot: string; text: string }> = {
-    Stocked: { dot: "bg-[#1E7A4B]", text: "text-[#1E7A4B]" },
-    "Available to order": { dot: "bg-gold-600", text: "text-gold-800" },
-    "Ask us": { dot: "bg-n-400", text: "text-n-600" },
+  const tone: Record<Availability, string> = {
+    Stocked: "text-[#1E7A4B]",
+    "Available to order": "text-gold-link",
+    "Ask us": "text-faint",
   };
-  const tone = map[value];
+  const dot: Record<Availability, string> = {
+    Stocked: "bg-[#1E7A4B]",
+    "Available to order": "bg-gold",
+    "Ask us": "bg-faint-2",
+  };
   return (
-    <span className={`inline-flex items-center gap-[7px] text-[13px] font-medium ${tone.text}`}>
-      <span className={`size-[7px] rounded-full ${tone.dot}`} />
+    <span className={`inline-flex items-center gap-2 text-[13px] ${tone[value]}`}>
+      <span className={`size-[6px] rounded-full ${dot[value]}`} />
       {value}
     </span>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Hazard callout                                                              */
-/*                                                                             */
-/* Design system 04: persistent, never dismissible. Gold 400 marks hazard —    */
-/* this is the one place the accent is allowed to carry meaning.               */
-/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------- callout -- */
 
+/**
+ * Hazard callout.
+ *
+ * The premium document renders warnings as a quiet surface panel with the GHS
+ * diamond doing the signalling, rather than the old gold-bordered banner. The
+ * regulated red stays on the pictogram where it is legally meaningful; the
+ * container itself is neutral.
+ */
 export function HazardCallout({
   title,
   body,
@@ -180,25 +213,23 @@ export function HazardCallout({
     <div
       role="note"
       aria-label={title}
-      className={`flex gap-[18px] rounded-[3px] border border-gold-300 border-l-4 border-l-gold-400 bg-gold-100 ${
-        compact ? "p-4" : "px-[26px] py-[22px]"
-      }`}
+      className={`flex gap-5 rounded-panel bg-surface ${compact ? "p-4" : "px-6 py-5"}`}
     >
       <svg
-        width={compact ? 22 : 28}
-        height={compact ? 22 : 28}
+        width={compact ? 24 : 32}
+        height={compact ? 24 : 32}
         viewBox="0 0 24 24"
         className="mt-0.5 shrink-0"
         aria-hidden="true"
       >
-        <path d="M12 3l10 18H2z" fill="none" stroke="#deab38" strokeWidth="2" strokeLinejoin="round" />
-        <rect x="11" y="9" width="2" height="6" fill="#deab38" />
-        <rect x="11" y="17" width="2" height="2" fill="#deab38" />
+        <path d="M12 3l10 18H2z" fill="none" stroke="#C0392B" strokeWidth="1.8" strokeLinejoin="round" />
+        <rect x="11.1" y="9" width="1.8" height="6" fill="#C0392B" />
+        <rect x="11.1" y="17" width="1.8" height="1.8" fill="#C0392B" />
       </svg>
-      <div className="flex flex-col gap-[7px]">
-        <span className={`font-semibold ${compact ? "text-[15px]" : "text-[16.5px]"}`}>{title}</span>
+      <div className="flex flex-col gap-1.5">
+        <span className={compact ? "text-[15px]" : "text-[17px]"}>{title}</span>
         <span
-          className={`max-w-[800px] leading-[1.6] text-n-800 ${compact ? "text-[13.5px]" : "text-[15px]"}`}
+          className={`max-w-[80ch] leading-[1.6] text-muted ${compact ? "text-[13.5px]" : "text-[15px]"}`}
           style={{ textWrap: "pretty" }}
         >
           {body}
@@ -208,43 +239,33 @@ export function HazardCallout({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Informational note — hairline icon + muted text                             */
-/* -------------------------------------------------------------------------- */
-
 export function InfoNote({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-[14px] flex items-center gap-[10px]">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8d939b" strokeWidth="2" aria-hidden="true" className="shrink-0">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 11v5M12 8h.01" />
-      </svg>
-      <span className="text-[13.5px] text-n-600">{children}</span>
-    </div>
+    <p className="mt-4 text-[13.5px] leading-[1.6] text-faint" style={{ textWrap: "pretty" }}>
+      {children}
+    </p>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Breadcrumb                                                                  */
-/* -------------------------------------------------------------------------- */
+/* ----------------------------------------------------------- breadcrumb -- */
 
-export function Breadcrumb({
-  trail,
-}: {
-  trail: { label: string; href?: string }[];
-}) {
+/**
+ * Premium breadcrumb: mono uppercase, dot-separated, no chevrons.
+ * "Home · Gases · Industrial & Pure · Argon"
+ */
+export function Breadcrumb({ trail }: { trail: { label: string; href?: string }[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="font-mono text-xs text-n-600">
-      <ol className="flex flex-wrap items-center gap-2">
+    <nav aria-label="Breadcrumb">
+      <ol className="flex flex-wrap items-center gap-2 font-mono text-[11.5px] uppercase tracking-[0.14em] text-faint">
         {trail.map((item, i) => (
           <li key={i} className="flex items-center gap-2">
-            {i > 0 && <span aria-hidden="true">›</span>}
+            {i > 0 && <span aria-hidden="true">·</span>}
             {item.href ? (
-              <Link href={item.href} className="text-n-600 hover:text-gold-800">
+              <Link href={item.href} className="text-faint hover:text-ink">
                 {item.label}
               </Link>
             ) : (
-              <span className="text-n-900">{item.label}</span>
+              <span className="text-ink-2">{item.label}</span>
             )}
           </li>
         ))}
@@ -253,25 +274,9 @@ export function Breadcrumb({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Page shell — 1280px content column, 56px gutters                            */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------- tables -- */
 
-export function Container({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`gutter ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-/** Table wrapper: hairline border, 4px radius, horizontal scroll inside itself. */
+/** Table frame: 16px radius, hairline border, scrolls inside itself. */
 export function TableFrame({
   children,
   className = "",
@@ -280,13 +285,13 @@ export function TableFrame({
   className?: string;
 }) {
   return (
-    <div className={`overflow-hidden rounded-[4px] border border-n-100 ${className}`}>
+    <div className={`overflow-hidden rounded-panel border border-line ${className}`}>
       <div className="overflow-x-auto">{children}</div>
     </div>
   );
 }
 
-/** Sticky table header cell — mono caps, 10.5px. */
+/** Table header cell — mono caps on the surface tint. */
 export function Th({
   children,
   align = "left",
@@ -299,11 +304,31 @@ export function Th({
   return (
     <th
       scope="col"
-      className={`whitespace-nowrap px-[18px] py-[14px] font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] ${
+      className={`whitespace-nowrap px-5 py-3.5 font-mono text-[10.5px] font-normal uppercase tracking-[0.14em] text-faint ${
         align === "right" ? "text-right" : "text-left"
       } ${className}`}
     >
       {children}
     </th>
+  );
+}
+
+/** Stat cell for the hairline-divided figure rows. */
+export function StatCell({
+  value,
+  label,
+  className = "",
+}: {
+  value: ReactNode;
+  label: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`flex flex-col gap-2 ${className}`}>
+      <span className="font-mono text-[32px] leading-none tracking-[-0.02em] md:text-[40px]">
+        {value}
+      </span>
+      <span className="text-sm text-muted">{label}</span>
+    </div>
   );
 }
